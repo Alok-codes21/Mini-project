@@ -170,4 +170,4 @@ function determinant(M, t, label, depth) {
   t.add('calculate', 'return-determinant', `Return det(${label})`, `All ${n} terms are included; det(${label}) = ${total}.`,
     rule, ['Return this value to the parent calculation, or use it as the final determinant.'], { determinant: total, label, depth });
   return total;
-                                 }
+}
