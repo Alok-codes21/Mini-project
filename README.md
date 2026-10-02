@@ -43,7 +43,7 @@ Copy `.env.example` to `.env`; the server loads it automatically at startup. Rea
 | `CORS_ORIGIN` | empty | Comma-separated exact origins allowed in browsers, such as `https://app.example.com,http://localhost:5173`. Empty: development allows any `localhost` origin, production allows no browser origins. `*` is rejected in production. |
 | `RATE_LIMIT_WINDOW_MS` | `60000` | Rate-limit window in milliseconds |
 | `RATE_LIMIT_MAX` | `120` | Requests per client IP per window on `/api` routes |
-| `TRUST_PROXY` | `0` | Reverse-proxy hops to trust so rate limits use the real client IP. Set `1` behind one proxy. |
+| `TRUST_PROXY` | `0` | Reverse-proxy hops to trust so rate limits use the real client IP. Set `1` behind one proxy such as Render. With `NODE_ENV=production` and `TRUST_PROXY` unset, the server logs a startup warning, because every client behind the proxy would share one IP and one rate-limit bucket. |
 | `LOG_REQUESTS` | `true` | One JSON log line per request (method, path, status, time, request id). Request bodies are never logged. |
 | `SHUTDOWN_TIMEOUT_MS` | `10000` | Time allowed for in-flight requests on SIGTERM/SIGINT |
 
@@ -75,6 +75,45 @@ Send JSON with `Content-Type: application/json`. Matrices are arrays of rows. Nu
 | POST | `/api/matrix/multiply` | `{ "A": [[1,2],[3,4]], "B": [[5,6],[7,8]] }` | Intermediate |
 | POST | `/api/matrix/determinant` | `{ "A": [[1,2],[3,4]] }` | Advanced |
 | POST | `/api/number-system/convert` | `{ "number": "13", "fromBase": 10, "toBase": 2 }` | Beginner; non-decimal to non-decimal is intermediate |
+| POST | `/api/practice/check` | `{ "operation": "multiply", "input": { "A": [[1,2],[3,4]], "B": [[5,6],[7,8]] }, "answer": [[19,22],[43,49]] }` | Practice helper (optional) |
+
+### Choosing how many steps: `?detail=`
+
+All matrix and number-system routes accept an optional query parameter `detail`:
+
+| Value | What you get |
+| --- | --- |
+| `full` (default) | Every step. Same as not sending the parameter; nothing changes for existing clients. |
+| `compact` | Fewer steps: setup, one step per result cell (matrices), one per digit read and one per remainder (number conversion), one per cofactor term and minor result (determinants), and the final steps. Same `result`. Step ids stay sequential. |
+| `beginner` | The full trace plus one leading `before-you-start` step that explains matrices (rows, columns, entries) or place value. |
+
+Any other value (including an empty or repeated one) returns `400 INVALID_INPUT` with `error.field` set to `detail`. For `compact` and `beginner`, `summary.detail` echoes the choice. An 8 x 8 multiplication drops from 1,156 steps to 68 with `compact`.
+
+Responses are gzip-compressed when the client sends `Accept-Encoding: gzip` (browsers and `fetch` do this automatically).
+
+### Practice check: `POST /api/practice/check`
+
+Body: `operation` (`add`, `subtract`, `transpose`, `multiply`, `determinant` or `convert`), `input` (the same body as that operation's own endpoint), `answer` (a matrix for the matrix operations, a number for `determinant`, a string for `convert`) and optional `reveal` (`true` adds the correct answer as `expected`).
+
+```json
+{
+  "success": true,
+  "schemaVersion": "1.0",
+  "module": "matrix",
+  "operation": "multiply",
+  "correct": false,
+  "totalSteps": 22,
+  "firstWrongStep": {
+    "id": 22, "stage": "calculate", "action": "select-row-column",
+    "title": "Select row 2 and column 2",
+    "explanation": "...", "highlights": [{ "matrix": "C", "row": 1, "column": 1 }],
+    "reason": "cell-mismatch", "confidence": "medium",
+    "hint": "This is the first result cell (in calculation order) that does not match. Redo its calculation from here."
+  }
+}
+```
+
+`firstWrongStep.id` is a step id in the full trace of the same question, so a frontend can jump to it. The step is a best guess, and `confidence` says how good: `high` for wrong dimensions, a running total that stopped early, a reversed digit order or an invalid digit; `medium` for a mismatching cell or a sign or skipped-term pattern; `low` when nothing recognizable fits and the first step to re-check is returned. Matrix cells are compared in the order the trace calculates them; numbers within a relative `1e-9` count as equal; conversion answers ignore case and leading zeros. Invalid `operation`, `input` or `answer` return `400 INVALID_INPUT` with the offending `field`.
 
 Learning levels are labels for ordering lessons, not a locked progression or user-account system. The backend is stateless.
 
@@ -145,6 +184,10 @@ Shortened response (the real one has 28 steps; see `examples/multiply-response.j
 ```
 
 The answer is `result`. Each entry in `steps` explains one small move (select a row and column, multiply a pair, add to the running sum, store a cell) with the state at that moment.
+
+### Learner-facing text: 1-based, machine data: 0-based
+
+Explanations count from 1 ("row 1, column 2") while `formula`, `state` and `highlights` use JavaScript's 0-based indices (`A[0][1]`). Steps whose formula contains concrete indices also carry an optional `displayFormula` with the 1-based numbers (`A[1][2]`); show that one to learners. Nothing in `formula`, `state` or `highlights` changed. The last entry of every step's `keyPoints` is a `Why: ...` line.
 
 ## Response contract
 
@@ -242,13 +285,25 @@ All 16 source-target combinations among binary (2), octal (8), decimal (10), and
 - Matrix entries: finite JSON numbers with absolute value at most 1,000,000. Strings, `null` and missing entries are rejected.
 - Add/subtract: same dimensions. Multiply: columns(A) must equal rows(B).
 - Determinants: square, at most 4 x 4, to keep recursive educational traces manageable.
-- Matrix arithmetic uses JavaScript numbers. Binary floating-point noise is cleaned to 15 significant digits (0.1 + 0.2 shows as 0.3). If any intermediate or final value would exceed 9,007,199,254,740,991 in absolute value, the API returns 422 `RESULT_TOO_LARGE` instead of an inexact number. Decimal inputs are still approximate to about 15 digits. This is an educational API, not an exact rational algebra system.
+- Matrix arithmetic uses JavaScript numbers. Every computed value is rounded to 15 significant digits to clean binary floating-point noise (0.1 + 0.2 shows as 0.3). Integers are never rounded. When rounding actually changes a value, the response adds `summary.notes` with a message saying so; otherwise `summary.notes` is absent. If any intermediate or final value would exceed 9,007,199,254,740,991 in absolute value, the API returns 422 `RESULT_TOO_LARGE` instead of an inexact number. `error.field` is `result` for computed values (the usual case, because inputs are limited to 1,000,000 and a product, sum or determinant is what grows), or `A` / `B` when an input itself is the cause. Decimal inputs are still approximate to about 15 digits. This is an educational API, not an exact rational algebra system.
 - Number systems: 1 to 64 source digits, optionally prefixed by `-`; integer values only. No `+`, whitespace, `0x`/`0b` prefixes, fractions or exponent notation.
 - Hex letters are case-insensitive on input and uppercase on output. Leading zeros are removed; `-0` becomes `0`.
 - Negative results use a minus sign, not two's-complement encoding.
 - Number conversions use BigInt and remain exact within the accepted input limits.
 - Request JSON body limit: 64 KB (gzip bodies are accepted; the limit applies after decompression). The app has no stored history or authentication.
-- A full 8 x 8 multiplication returns about 1,150 steps and 0.75 MB of JSON.
+- Worst-case response sizes, measured with this version (integer entries; decimal entries produce longer numbers). The server compresses with gzip when asked; the gzip column is what travels over the network for a client that accepts it.
+
+| Request | Steps (full) | JSON (full) | gzip (full) | Steps (compact) | JSON (compact) |
+| --- | --- | --- | --- | --- | --- |
+| Multiply 8 x 8, entries near 1,000,000 | 1,156 | 1.4 MB | 57 KB | 68 | 89 KB |
+| Multiply 8 x 8, entries near 1,000 | 1,156 | 1.2 MB | 53 KB | 68 | 75 KB |
+| Add 8 x 8 | 196 | 162 KB | 5 KB | 68 | 58 KB |
+| Transpose 8 x 8 | 132 | 104 KB | 4 KB | 68 | 55 KB |
+| Determinant 4 x 4 | 285 | 132 KB | 8 KB | 84 | 38 KB |
+| Convert 64 hex digits to binary (largest) | 2,313 | 1.7 MB | 81 KB | 581 | 559 KB |
+| Convert 64 decimal digits to binary | 1,969 | 1.4 MB | 60 KB | 495 | 425 KB |
+
+Request bodies stay limited to 64 KB and `/api` stays rate limited. Frontends that only need the answer or a short walk-through should send `?detail=compact`.
 
 ### Errors
 
@@ -283,7 +338,8 @@ Every error has the same shape. `field` appears for input problems; `requestId` 
 
 - `helmet` sets standard security headers; `X-Powered-By` is removed; responses are `Cache-Control: no-store`.
 - Rate limit: by default 120 requests per minute per client IP on `/api` routes. `/health` and CORS preflight requests are not counted. Limit headers (`RateLimit`, `RateLimit-Policy`, `Retry-After`) are sent. Behind a proxy set `TRUST_PROXY`, otherwise all users share the proxy's IP.
-- The rate limiter keeps counters in process memory. That suits one small instance; with several instances each has its own counters.
+- The rate limiter is in-memory. Each running instance keeps its own counters, and they reset on restart. With N instances behind a load balancer a client can make up to N times the configured limit. When you scale to more than one instance, use a shared store such as Redis (for example `rate-limit-redis` with `express-rate-limit`) so all instances count together.
+- Behind a proxy (Render, Railway, Nginx) set `TRUST_PROXY=1`. Otherwise every client appears to come from the proxy's IP and all of them share one bucket. In production the server warns at startup when `TRUST_PROXY` is not set.
 - CORS only echoes origins you list in `CORS_ORIGIN`. CORS controls browser access only. It is not authentication.
 - There is no authentication and no HTTPS inside the app. Deploy behind a platform or reverse proxy that terminates HTTPS.
 
@@ -324,9 +380,14 @@ Run `npm test` (Node's built-in test runner; no extra test dependency). No linte
 - Trace integrity: sequential ids, required fields, `summary.totalSteps`, valid highlight positions, snapshot states that later steps or callers cannot change, `null` (not 0) for uncalculated cells.
 - All 16 base combinations across 200 integers, 64-digit inputs and random 200-bit values checked against BigInt, and strict number-format rejection (prefixes, signs, spaces, fractions, exponents, bad digits, bad bases).
 - Live HTTP: response contract, error shape for every status, malformed JSON, wrong content type, unsupported and corrupt encoding, body limits, 404/405, security headers, request ids, CORS (configured, development and production defaults, preflight), rate limiting.
-- Environment validation (ports, rate limits, production CORS).
+- Environment validation (ports, rate limits, production CORS) and the production `TRUST_PROXY` warning.
+- `?detail=` levels, gzip, rounding notes, error fields, 1-based `displayFormula`, `Why:` lines, the practice endpoint, `render.yaml` and the CI workflow (`test/improvements.test.js`).
 
-GitHub Actions runs the tests on every push and pull request.
+GitHub Actions (`.github/workflows/ci.yml`) runs `npm ci` and `npm test` on Node 22 for every push and pull request.
+
+## Deploying on Render
+
+`render.yaml` is a Render Blueprint: in Render choose New > Blueprint and select this repository. It sets `NODE_VERSION=22`, `NODE_ENV=production`, `TRUST_PROXY=1`, the health check path `/health`, `npm ci` as the build command and `npm start` as the start command. Set `CORS_ORIGIN` (exact frontend origins, comma separated) in the Render dashboard; production allows no browser origins until you do. Other platforms need the same environment variables.
 
 ## Before a public deployment
 
