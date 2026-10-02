@@ -96,5 +96,5 @@ export function finish(module, operation, level, input, result, t, keyPoints, { 
   const summary = { totalSteps: t.steps.length, keyPoints };
   if (detail !== 'full') summary.detail = detail;
   if (notes.length) summary.notes = notes;
-  return { success: true, schemaVersion: '1.0', module, operation, level, input, result, steps: t.steps, summary };
+  return { success: true, schemaVersion: '1.0', module, operation, detail, level, input, result, steps: t.steps, summary };
 }
