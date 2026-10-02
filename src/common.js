@@ -1,5 +1,10 @@
 export class InputError extends Error {
-  constructor(message, field) { super(message); this.field = field; }
+  constructor(message, field, { code = 'INVALID_INPUT', status = 400 } = {}) {
+    super(message);
+    this.field = field;
+    this.code = code;
+    this.status = status;
+  }
 }
 export function requireObject(body) {
   if (!body || typeof body !== 'object' || Array.isArray(body)) {
