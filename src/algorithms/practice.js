@@ -22,9 +22,10 @@ const HINTS = {
   unknown: 'I could not tell exactly where it went wrong, so this is the first place to start checking.'
 };
 
+// Never include step.explanation here: it can state the correct result. Learners fetch the full text from the normal endpoint using the step id.
 function stepSummary(step, reason, confidence) {
   return {
-    id: step.id, stage: step.stage, action: step.action, title: step.title, explanation: step.explanation,
+    id: step.id, stage: step.stage, action: step.action, title: step.title,
     highlights: step.highlights, reason, confidence, hint: HINTS[reason]
   };
 }
