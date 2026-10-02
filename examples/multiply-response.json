@@ -3,6 +3,7 @@
   "schemaVersion": "1.0",
   "module": "matrix",
   "operation": "multiply",
+  "detail": "full",
   "level": "intermediate",
   "input": {
     "A": [
