@@ -1,0 +1,49 @@
+@baseUrl = http://localhost:3000
+
+### Health
+GET {{baseUrl}}/health
+
+### Supported operations
+GET {{baseUrl}}/api
+
+### Matrix addition
+POST {{baseUrl}}/api/matrix/add
+Content-Type: application/json
+
+{"A":[[1,2],[3,4]],"B":[[5,6],[7,8]]}
+
+### Matrix subtraction
+POST {{baseUrl}}/api/matrix/subtract
+Content-Type: application/json
+
+{"A":[[1,2],[3,4]],"B":[[5,6],[7,8]]}
+
+### Rectangular transpose
+POST {{baseUrl}}/api/matrix/transpose
+Content-Type: application/json
+
+{"A":[[1,2,3],[4,5,6]]}
+
+### Matrix multiplication
+POST {{baseUrl}}/api/matrix/multiply
+Content-Type: application/json
+
+{"A":[[1,2],[3,4]],"B":[[5,6],[7,8]]}
+
+### Recursive determinant
+POST {{baseUrl}}/api/matrix/determinant
+Content-Type: application/json
+
+{"A":[[6,1,1],[4,-2,5],[2,8,7]]}
+
+### Decimal to binary
+POST {{baseUrl}}/api/number-system/convert
+Content-Type: application/json
+
+{"number":"13","fromBase":10,"toBase":2}
+
+### Hexadecimal to octal
+POST {{baseUrl}}/api/number-system/convert
+Content-Type: application/json
+
+{"number":"AF","fromBase":16,"toBase":8}
