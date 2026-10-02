@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Matrix & Number System Learning API",
-    "version": "1.0.0",
-    "description": "Returns each answer plus a step-by-step trace for frontend visualization."
+    "version": "1.2.0",
+    "description": "Returns each answer plus a step-by-step trace for frontend visualization. Computed decimals are rounded to 15 significant digits to remove floating-point noise (0.1 + 0.2 is returned as 0.3). When rounding changes a value, the response includes summary.notes. Responses are gzip-compressed when the client sends Accept-Encoding: gzip."
   },
   "paths": {
     "/health": {
@@ -117,7 +117,7 @@
             }
           },
           "422": {
-            "description": "Result too large to show exactly",
+            "description": "Result too large to show exactly (error.field is A, B or \"result\"; computed values report \"result\")",
             "content": {
               "application/json": {
                 "schema": {
@@ -136,7 +136,24 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "detail",
+            "in": "query",
+            "required": false,
+            "description": "How many steps to return. full (default) returns every step. compact returns one step per result cell (matrices), per digit read and per remainder (number conversion), and per cofactor term (determinants). beginner returns the full trace plus a leading before-you-start step. Unknown values return 400 INVALID_INPUT with field \"detail\".",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "compact",
+                "beginner"
+              ],
+              "default": "full"
+            }
+          }
+        ]
       }
     },
     "/api/matrix/subtract": {
@@ -230,7 +247,7 @@
             }
           },
           "422": {
-            "description": "Result too large to show exactly",
+            "description": "Result too large to show exactly (error.field is A, B or \"result\"; computed values report \"result\")",
             "content": {
               "application/json": {
                 "schema": {
@@ -249,7 +266,24 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "detail",
+            "in": "query",
+            "required": false,
+            "description": "How many steps to return. full (default) returns every step. compact returns one step per result cell (matrices), per digit read and per remainder (number conversion), and per cofactor term (determinants). beginner returns the full trace plus a leading before-you-start step. Unknown values return 400 INVALID_INPUT with field \"detail\".",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "compact",
+                "beginner"
+              ],
+              "default": "full"
+            }
+          }
+        ]
       }
     },
     "/api/matrix/multiply": {
@@ -343,7 +377,7 @@
             }
           },
           "422": {
-            "description": "Result too large to show exactly",
+            "description": "Result too large to show exactly (error.field is A, B or \"result\"; computed values report \"result\")",
             "content": {
               "application/json": {
                 "schema": {
@@ -362,7 +396,24 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "detail",
+            "in": "query",
+            "required": false,
+            "description": "How many steps to return. full (default) returns every step. compact returns one step per result cell (matrices), per digit read and per remainder (number conversion), and per cofactor term (determinants). beginner returns the full trace plus a leading before-you-start step. Unknown values return 400 INVALID_INPUT with field \"detail\".",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "compact",
+                "beginner"
+              ],
+              "default": "full"
+            }
+          }
+        ]
       }
     },
     "/api/matrix/transpose": {
@@ -440,7 +491,7 @@
             }
           },
           "422": {
-            "description": "Result too large to show exactly",
+            "description": "Result too large to show exactly (error.field is A, B or \"result\"; computed values report \"result\")",
             "content": {
               "application/json": {
                 "schema": {
@@ -459,7 +510,24 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "detail",
+            "in": "query",
+            "required": false,
+            "description": "How many steps to return. full (default) returns every step. compact returns one step per result cell (matrices), per digit read and per remainder (number conversion), and per cofactor term (determinants). beginner returns the full trace plus a leading before-you-start step. Unknown values return 400 INVALID_INPUT with field \"detail\".",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "compact",
+                "beginner"
+              ],
+              "default": "full"
+            }
+          }
+        ]
       }
     },
     "/api/matrix/determinant": {
@@ -537,7 +605,7 @@
             }
           },
           "422": {
-            "description": "Result too large to show exactly",
+            "description": "Result too large to show exactly (error.field is A, B or \"result\"; computed values report \"result\")",
             "content": {
               "application/json": {
                 "schema": {
@@ -556,7 +624,24 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "detail",
+            "in": "query",
+            "required": false,
+            "description": "How many steps to return. full (default) returns every step. compact returns one step per result cell (matrices), per digit read and per remainder (number conversion), and per cofactor term (determinants). beginner returns the full trace plus a leading before-you-start step. Unknown values return 400 INVALID_INPUT with field \"detail\".",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "compact",
+                "beginner"
+              ],
+              "default": "full"
+            }
+          }
+        ]
       }
     },
     "/api/number-system/convert": {
@@ -631,6 +716,222 @@
               }
             }
           }
+        },
+        "parameters": [
+          {
+            "name": "detail",
+            "in": "query",
+            "required": false,
+            "description": "How many steps to return. full (default) returns every step. compact returns one step per result cell (matrices), per digit read and per remainder (number conversion), and per cofactor term (determinants). beginner returns the full trace plus a leading before-you-start step. Unknown values return 400 INVALID_INPUT with field \"detail\".",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "full",
+                "compact",
+                "beginner"
+              ],
+              "default": "full"
+            }
+          }
+        ]
+      }
+    },
+    "/api/practice/check": {
+      "post": {
+        "summary": "Check a learner's answer",
+        "description": "Recalculates the operation from input and compares it with answer. If the answer is wrong, firstWrongStep points at the step in the full trace (call the matching operation endpoint to see it) where the learner most likely went wrong. The reason and confidence fields say how sure that guess is. Matrix answers are compared cell by cell in calculation order; numbers within a relative 1e-9 count as equal. Conversion answers are case-insensitive and ignore leading zeros.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "operation",
+                  "input",
+                  "answer"
+                ],
+                "properties": {
+                  "operation": {
+                    "type": "string",
+                    "enum": [
+                      "add",
+                      "subtract",
+                      "transpose",
+                      "multiply",
+                      "determinant",
+                      "convert"
+                    ]
+                  },
+                  "input": {
+                    "type": "object",
+                    "description": "Same body as the matching operation endpoint: { A, B } for matrices, { number, fromBase, toBase } for convert."
+                  },
+                  "answer": {
+                    "description": "A matrix (array of rows) for add, subtract, transpose and multiply; a number for determinant; a string for convert."
+                  },
+                  "reveal": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "When true, the response also includes the correct answer as expected."
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Check result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "success",
+                    "schemaVersion",
+                    "module",
+                    "operation",
+                    "correct",
+                    "totalSteps"
+                  ],
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "schemaVersion": {
+                      "type": "string"
+                    },
+                    "module": {
+                      "type": "string",
+                      "enum": [
+                        "matrix",
+                        "number-system"
+                      ]
+                    },
+                    "operation": {
+                      "type": "string"
+                    },
+                    "correct": {
+                      "type": "boolean"
+                    },
+                    "totalSteps": {
+                      "type": "integer",
+                      "description": "Number of steps in the full trace."
+                    },
+                    "expected": {
+                      "description": "Only when reveal is true."
+                    },
+                    "firstWrongStep": {
+                      "type": "object",
+                      "description": "Only when correct is false.",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "stage": {
+                          "type": "string"
+                        },
+                        "action": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "explanation": {
+                          "type": "string"
+                        },
+                        "highlights": {
+                          "type": "array",
+                          "items": {
+                            "type": "object"
+                          }
+                        },
+                        "reason": {
+                          "type": "string",
+                          "enum": [
+                            "shape",
+                            "cell-mismatch",
+                            "stopped-early",
+                            "sign",
+                            "term-skipped",
+                            "invalid-digit",
+                            "sign-mismatch",
+                            "reversed",
+                            "remainder-mismatch",
+                            "extra-digits",
+                            "digit-mismatch",
+                            "unknown"
+                          ]
+                        },
+                        "confidence": {
+                          "type": "string",
+                          "enum": [
+                            "high",
+                            "medium",
+                            "low"
+                          ]
+                        },
+                        "hint": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input or answer",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Use POST",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Body over 64 KB",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "415": {
+            "description": "Unsupported media type or encoding",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limited",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -673,7 +974,8 @@
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "The last entry is a 'Why: ...' line that says why the step is done."
           },
           "state": {
             "type": "object"
@@ -683,6 +985,10 @@
             "items": {
               "type": "object"
             }
+          },
+          "displayFormula": {
+            "type": "string",
+            "description": "Optional. The formula with 1-based indices (A[1][2]) to match the explanation text. Present only when it differs from formula. formula, state and highlights always use 0-based indices."
           }
         }
       },
@@ -739,6 +1045,21 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "detail": {
+                "type": "string",
+                "enum": [
+                  "compact",
+                  "beginner"
+                ],
+                "description": "Present only when ?detail was compact or beginner."
+              },
+              "notes": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Present only when rounding to 15 significant digits changed a value."
               }
             }
           }
