@@ -41,3 +41,16 @@ test('API: style only with ?style=hints', async () => {
   assert.equal(h.style.module, 'add');
   server.close();
 });
+
+test('module headers use exact true-colour hex and all six differ', async () => {
+  const { makeStyler, MODULE_COLORS } = await import('../src/style.js');
+  const s = makeStyler(true);
+  const seen = new Set();
+  for (const [key, c] of Object.entries(MODULE_COLORS)) {
+    const [r, g, b] = [1, 3, 5].map(i => parseInt(c.hex.slice(i, i + 2), 16));
+    const out = s.accent(key, 'x');
+    assert.equal(out, `\x1b[1;38;2;${r};${g};${b}mx\x1b[0m`);
+    seen.add(out);
+  }
+  assert.equal(seen.size, 6);
+});
