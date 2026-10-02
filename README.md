@@ -7,7 +7,13 @@ The algorithms are handwritten JavaScript. Express handles HTTP only; no mathema
 ## Start on Windows, macOS or Linux
 
 1. Install Node.js 22 or newer (npm is included).
-2. Extract the ZIP and open a terminal in `matrix-number-backend`.
+2. Clone the repository and open a terminal in its folder:
+
+```text
+git clone https://github.com/Alok-codes21/Mini-project.git
+cd Mini-project
+```
+
 3. Run:
 
 ```text
@@ -26,14 +32,24 @@ npm run dev
 
 No database, API key or paid service is required. An internet connection is needed for the initial npm dependency download.
 
-### Optional environment settings
+### Environment settings
 
-`PORT` defaults to `3000`. Set `CORS_ORIGIN` to the exact origin of your separate frontend if it needs browser access. CORS is disabled by default. `.env.example` documents the settings; the application does not automatically load `.env` files.
+Copy `.env.example` to `.env`; the server loads it automatically at startup. Real environment variables (for example on a hosting platform) override `.env`. Invalid values stop the server at startup with a clear message. Never commit `.env`.
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `NODE_ENV` | `development` | `development`, `production` or `test` |
+| `PORT` | `3000` | Integer 1 to 65535 |
+| `CORS_ORIGIN` | empty | Comma-separated exact origins allowed in browsers, such as `https://app.example.com,http://localhost:5173`. Empty: development allows any `localhost` origin, production allows no browser origins. `*` is rejected in production. |
+| `RATE_LIMIT_WINDOW_MS` | `60000` | Rate-limit window in milliseconds |
+| `RATE_LIMIT_MAX` | `120` | Requests per client IP per window on `/api` routes |
+| `TRUST_PROXY` | `0` | Reverse-proxy hops to trust so rate limits use the real client IP. Set `1` behind one proxy. |
+| `LOG_REQUESTS` | `true` | One JSON log line per request (method, path, status, time, request id). Request bodies are never logged. |
+| `SHUTDOWN_TIMEOUT_MS` | `10000` | Time allowed for in-flight requests on SIGTERM/SIGINT |
 
 PowerShell:
 
 ```powershell
-$env:PORT = "3000"
 $env:CORS_ORIGIN = "http://localhost:5173"
 npm start
 ```
@@ -41,7 +57,7 @@ npm start
 Bash:
 
 ```bash
-PORT=3000 CORS_ORIGIN=http://localhost:5173 npm start
+CORS_ORIGIN=http://localhost:5173 npm start
 ```
 
 ## Endpoints
@@ -52,6 +68,7 @@ Send JSON with `Content-Type: application/json`. Matrices are arrays of rows. Nu
 | --- | --- | --- | --- |
 | GET | `/health` | None | Server check |
 | GET | `/api` | None | Route discovery and limits |
+| GET | `/api/openapi.json` | None | OpenAPI 3 description of the API |
 | POST | `/api/matrix/add` | `{ "A": [[1,2],[3,4]], "B": [[5,6],[7,8]] }` | Beginner |
 | POST | `/api/matrix/subtract` | Same as addition | Beginner |
 | POST | `/api/matrix/transpose` | `{ "A": [[1,2,3],[4,5,6]] }` | Beginner |
@@ -90,6 +107,44 @@ curl -X POST http://localhost:3000/api/matrix/multiply \
 ```
 
 `examples/requests.http` contains all endpoints for an HTTP client extension. `examples/multiply-response.json` and `examples/decimal-to-binary-response.json` contain complete, generated example responses.
+
+## Complete example: matrix multiplication
+
+The API returns both the final `result` and the step-by-step `steps` trace that a frontend can animate. Request:
+
+```bash
+curl -X POST http://localhost:3000/api/matrix/multiply \
+  -H "Content-Type: application/json" \
+  -d '{"A": [[1,2],[3,4]], "B": [[5,6],[7,8]]}'
+```
+
+Shortened response (the real one has 28 steps; see `examples/multiply-response.json` for the full output):
+
+```json
+{
+  "success": true,
+  "schemaVersion": "1.0",
+  "module": "matrix",
+  "operation": "multiply",
+  "level": "intermediate",
+  "input": { "A": [[1,2],[3,4]], "B": [[5,6],[7,8]] },
+  "result": [[19,22],[43,50]],
+  "steps": [
+    {
+      "id": 1, "stage": "understand", "action": "inspect-dimensions",
+      "title": "Read the matrix dimensions",
+      "explanation": "A has 2 rows and 2 columns; B has 2 rows and 2 columns. ...",
+      "formula": "dimensions = number of rows x number of columns",
+      "keyPoints": ["The number of columns in A must equal the number of rows in B.", "..."],
+      "state": { "A": [[1,2],[3,4]], "B": [[5,6],[7,8]] },
+      "highlights": []
+    }
+  ],
+  "summary": { "totalSteps": 28, "keyPoints": ["..."] }
+}
+```
+
+The answer is `result`. Each entry in `steps` explains one small move (select a row and column, multiply a pair, add to the running sum, store a cell) with the state at that moment.
 
 ## Response contract
 
@@ -187,16 +242,17 @@ All 16 source-target combinations among binary (2), octal (8), decimal (10), and
 - Matrix entries: finite JSON numbers with absolute value at most 1,000,000. Strings, `null` and missing entries are rejected.
 - Add/subtract: same dimensions. Multiply: columns(A) must equal rows(B).
 - Determinants: square, at most 4 x 4, to keep recursive educational traces manageable.
-- Matrix arithmetic uses JavaScript floating-point numbers. Decimal rounding and loss of integer precision can occur in large products or determinants. This is an educational numerical API, not an exact rational algebra system.
+- Matrix arithmetic uses JavaScript numbers. Binary floating-point noise is cleaned to 15 significant digits (0.1 + 0.2 shows as 0.3). If any intermediate or final value would exceed 9,007,199,254,740,991 in absolute value, the API returns 422 `RESULT_TOO_LARGE` instead of an inexact number. Decimal inputs are still approximate to about 15 digits. This is an educational API, not an exact rational algebra system.
 - Number systems: 1 to 64 source digits, optionally prefixed by `-`; integer values only. No `+`, whitespace, `0x`/`0b` prefixes, fractions or exponent notation.
 - Hex letters are case-insensitive on input and uppercase on output. Leading zeros are removed; `-0` becomes `0`.
 - Negative results use a minus sign, not two's-complement encoding.
 - Number conversions use BigInt and remain exact within the accepted input limits.
-- Request JSON body limit: 64 KB. The app has no stored history or authentication.
+- Request JSON body limit: 64 KB (gzip bodies are accepted; the limit applies after decompression). The app has no stored history or authentication.
+- A full 8 x 8 multiplication returns about 1,150 steps and 0.75 MB of JSON.
 
 ### Errors
 
-Bad inputs return HTTP 400 with a helpful message and field name:
+Every error has the same shape. `field` appears for input problems; `requestId` matches the `X-Request-Id` response header and the server log line.
 
 ```json
 {
@@ -204,12 +260,32 @@ Bad inputs return HTTP 400 with a helpful message and field name:
   "error": {
     "code": "INVALID_INPUT",
     "message": "The number of columns in A must equal the number of rows in B.",
-    "field": "B"
+    "field": "B",
+    "requestId": "3f0c2c1e-5b52-4a5f-9a43-0c9d6e2f4c11"
   }
 }
 ```
 
-Malformed JSON: 400 `INVALID_JSON`. Missing route: 404 `NOT_FOUND`. Oversized body: 413 `BODY_TOO_LARGE`. Unexpected server failures: 500 `INTERNAL_ERROR`, without stack traces sent to clients.
+| Status | `code` | When |
+| --- | --- | --- |
+| 400 | `INVALID_INPUT` | Missing, wrong-type or out-of-range input, incompatible dimensions |
+| 400 | `INVALID_JSON` | Malformed JSON |
+| 400 | `BAD_REQUEST` | Unreadable or corrupt request body |
+| 404 | `NOT_FOUND` | Unknown route |
+| 405 | `METHOD_NOT_ALLOWED` | Wrong HTTP method; the `Allow` header lists the right one |
+| 413 | `BODY_TOO_LARGE` | Body over 64 KB |
+| 415 | `UNSUPPORTED_MEDIA_TYPE` / `UNSUPPORTED_ENCODING` | Body is not JSON, or uses an unsupported encoding or charset |
+| 422 | `RESULT_TOO_LARGE` | An intermediate or final number would exceed JavaScript's exact integer range (9,007,199,254,740,991) |
+| 429 | `RATE_LIMITED` | Too many requests; see `Retry-After` |
+| 500 | `INTERNAL_ERROR` | Unexpected failure; details go to the server log only, never to the client |
+
+## Security and rate limiting
+
+- `helmet` sets standard security headers; `X-Powered-By` is removed; responses are `Cache-Control: no-store`.
+- Rate limit: by default 120 requests per minute per client IP on `/api` routes. `/health` and CORS preflight requests are not counted. Limit headers (`RateLimit`, `RateLimit-Policy`, `Retry-After`) are sent. Behind a proxy set `TRUST_PROXY`, otherwise all users share the proxy's IP.
+- The rate limiter keeps counters in process memory. That suits one small instance; with several instances each has its own counters.
+- CORS only echoes origins you list in `CORS_ORIGIN`. CORS controls browser access only. It is not authentication.
+- There is no authentication and no HTTPS inside the app. Deploy behind a platform or reverse proxy that terminates HTTPS.
 
 ## Folder structure
 
@@ -217,13 +293,18 @@ Malformed JSON: 400 `INVALID_JSON`. Missing route: 404 `NOT_FOUND`. Oversized bo
 src/
   app.js                      Express application and error handling
   server.js                   Server startup and shutdown
+  config.js                   Environment loading and validation
   common.js                   Input errors, trace snapshots and response builder
   algorithms/
     matrix.js                 Matrix validation and custom algorithms
     number-system.js          Exact base conversion and educational verification
  test/
   algorithms.test.js          Algorithm, validation and step-contract tests
-  api.test.js                 Live HTTP integration tests
+  hardening.test.js           Edge cases, trace integrity, number conversion, config
+  api.test.js                 Live HTTP integration tests (errors, CORS, rate limit, headers)
+docs/
+  openapi.json                OpenAPI 3 description
+.github/workflows/ci.yml      GitHub Actions: npm ci, npm test, npm audit
  examples/
   requests.http               Ready-to-use HTTP requests
   *-request.json              Example input bodies
@@ -237,12 +318,16 @@ README.md
 
 ## Tests and readiness
 
-Run `npm test`. The included suite covers:
+Run `npm test` (Node's built-in test runner; no extra test dependency). No linter is configured. The suite covers:
 
-- All five matrix operations, rectangular matrices, singular determinants, determinants from 1 x 1 to 4 x 4, and invalid inputs.
-- Atomic multiply/add/store steps and immutable intermediate matrix snapshots.
-- All 16 base combinations across 200 integers (3,200 conversion checks in one test).
-- Large exact integers, maximum-length hex inputs, zero, negative values, normalization and malformed inputs.
-- Live HTTP endpoints, request parsing, oversized payloads, route discovery and origin-specific CORS.
+- All five matrix operations, rectangular and boundary-size (8 x 8) matrices, singular determinants, determinants from 1 x 1 to 4 x 4, decimal cleanup, negative zero and refusal of results too large to show exactly.
+- Trace integrity: sequential ids, required fields, `summary.totalSteps`, valid highlight positions, snapshot states that later steps or callers cannot change, `null` (not 0) for uncalculated cells.
+- All 16 base combinations across 200 integers, 64-digit inputs and random 200-bit values checked against BigInt, and strict number-format rejection (prefixes, signs, spaces, fractions, exponents, bad digits, bad bases).
+- Live HTTP: response contract, error shape for every status, malformed JSON, wrong content type, unsupported and corrupt encoding, body limits, 404/405, security headers, request ids, CORS (configured, development and production defaults, preflight), rate limiting.
+- Environment validation (ports, rate limits, production CORS).
 
-This ZIP is a runnable, tested backend project, not a deployed service. No GitHub repository or external deployment was changed. Before public deployment, add platform-level rate limiting and HTTPS, assess resource limits, and choose authentication if access should be restricted. CORS controls browser access, not API authentication.
+GitHub Actions runs the tests on every push and pull request.
+
+## Before a public deployment
+
+This is a stateless educational service, not a hardened production system. Deploy behind HTTPS, set `NODE_ENV=production`, `CORS_ORIGIN`, and `TRUST_PROXY`, and review rate limits for your traffic. Add authentication only if you need to restrict access.
