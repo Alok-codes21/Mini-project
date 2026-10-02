@@ -824,7 +824,7 @@
                     },
                     "firstWrongStep": {
                       "type": "object",
-                      "description": "Only when correct is false.",
+                      "description": "Only when correct is false. Contains id, stage, action, title, highlights, reason, confidence and hint. It has no explanation field, so it never reveals the correct result. Fetch the full step text from the normal operation endpoint and look up the step with this id.",
                       "properties": {
                         "id": {
                           "type": "integer"
@@ -836,9 +836,6 @@
                           "type": "string"
                         },
                         "title": {
-                          "type": "string"
-                        },
-                        "explanation": {
                           "type": "string"
                         },
                         "highlights": {
@@ -999,6 +996,7 @@
           "schemaVersion",
           "module",
           "operation",
+          "detail",
           "level",
           "input",
           "result",
@@ -1020,6 +1018,15 @@
           },
           "operation": {
             "type": "string"
+          },
+          "detail": {
+            "type": "string",
+            "enum": [
+              "full",
+              "compact",
+              "beginner"
+            ],
+            "description": "The detail mode used for this response. Echoes the ?detail= query value; \"full\" when the parameter is omitted."
           },
           "level": {
             "type": "string"
