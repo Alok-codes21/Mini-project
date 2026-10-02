@@ -1,0 +1,990 @@
+{
+  "success": true,
+  "schemaVersion": "1.0",
+  "module": "matrix",
+  "operation": "multiply",
+  "level": "intermediate",
+  "input": {
+    "A": [
+      [
+        1,
+        2
+      ],
+      [
+        3,
+        4
+      ]
+    ],
+    "B": [
+      [
+        5,
+        6
+      ],
+      [
+        7,
+        8
+      ]
+    ]
+  },
+  "result": [
+    [
+      19,
+      22
+    ],
+    [
+      43,
+      50
+    ]
+  ],
+  "steps": [
+    {
+      "id": 1,
+      "stage": "understand",
+      "action": "inspect-dimensions",
+      "title": "Read the matrix dimensions",
+      "explanation": "A has 2 rows and 2 columns; B has 2 rows and 2 columns. A row runs horizontally and a column runs vertically.",
+      "formula": "dimensions = number of rows x number of columns",
+      "keyPoints": [
+        "The number of columns in A must equal the number of rows in B.",
+        "Array indices start at 0; explanation labels start at 1."
+      ],
+      "state": {
+        "A": [
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            4
+          ]
+        ],
+        "B": [
+          [
+            5,
+            6
+          ],
+          [
+            7,
+            8
+          ]
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 2,
+      "stage": "validate",
+      "action": "check-rule",
+      "title": "Check whether the operation is allowed",
+      "explanation": "2 columns in A match 2 rows in B, so multiplication is allowed. The result will have 2 rows and 2 columns.",
+      "formula": "C[i][j] = sum(A[i][k] * B[k][j], k = 0..columns(A)-1)",
+      "keyPoints": [
+        "The number of columns in A must equal the number of rows in B."
+      ],
+      "state": {
+        "valid": true
+      },
+      "highlights": []
+    },
+    {
+      "id": 3,
+      "stage": "prepare",
+      "action": "create-result",
+      "title": "Prepare the result matrix",
+      "explanation": "Create a 2 x 2 result matrix. Each null cell has not been calculated yet.",
+      "formula": "C[i][j] = sum(A[i][k] * B[k][j], k = 0..columns(A)-1)",
+      "keyPoints": [
+        "Fill one result cell at a time."
+      ],
+      "state": {
+        "result": [
+          [
+            null,
+            null
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 4,
+      "stage": "calculate",
+      "action": "select-row-column",
+      "title": "Select row 1 and column 1",
+      "explanation": "To calculate C at row 1, column 1, use row 1 of A (1, 2) and column 1 of B (5, 7). Match entries by their position. Start the running sum at 0.",
+      "formula": "C[i][j] = sum(A[i][k] * B[k][j], k = 0..columns(A)-1)",
+      "keyPoints": [
+        "Matrix multiplication uses a row from A and a column from B, not entry-by-entry multiplication."
+      ],
+      "state": {
+        "row": [
+          1,
+          2
+        ],
+        "column": [
+          5,
+          7
+        ],
+        "runningSum": 0,
+        "result": [
+          [
+            null,
+            null
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": [
+        {
+          "matrix": "C",
+          "row": 0,
+          "column": 0
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "stage": "calculate",
+      "action": "multiply-pair",
+      "title": "Multiply pair 1",
+      "explanation": "Multiply 1 from A by 5 from B: 1 * 5 = 5.",
+      "formula": "product = A[0][0] * B[0][0]",
+      "keyPoints": [
+        "Only matching positions in the selected row and column are paired."
+      ],
+      "state": {
+        "product": 5,
+        "terms": [
+          5
+        ],
+        "runningSum": 0,
+        "result": [
+          [
+            null,
+            null
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": [
+        {
+          "matrix": "A",
+          "row": 0,
+          "column": 0
+        },
+        {
+          "matrix": "B",
+          "row": 0,
+          "column": 0
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "stage": "calculate",
+      "action": "add-product",
+      "title": "Add product 1 to the running sum",
+      "explanation": "The previous sum is 0. Add the product 5: 0 + 5 = 5.",
+      "formula": "newSum = previousSum + product",
+      "keyPoints": [
+        "Include every product before storing this result cell."
+      ],
+      "state": {
+        "previousSum": 0,
+        "product": 5,
+        "runningSum": 5,
+        "terms": [
+          5
+        ],
+        "result": [
+          [
+            null,
+            null
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 7,
+      "stage": "calculate",
+      "action": "multiply-pair",
+      "title": "Multiply pair 2",
+      "explanation": "Multiply 2 from A by 7 from B: 2 * 7 = 14.",
+      "formula": "product = A[0][1] * B[1][0]",
+      "keyPoints": [
+        "Only matching positions in the selected row and column are paired."
+      ],
+      "state": {
+        "product": 14,
+        "terms": [
+          5,
+          14
+        ],
+        "runningSum": 5,
+        "result": [
+          [
+            null,
+            null
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": [
+        {
+          "matrix": "A",
+          "row": 0,
+          "column": 1
+        },
+        {
+          "matrix": "B",
+          "row": 1,
+          "column": 0
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "stage": "calculate",
+      "action": "add-product",
+      "title": "Add product 2 to the running sum",
+      "explanation": "The previous sum is 5. Add the product 14: 5 + 14 = 19.",
+      "formula": "newSum = previousSum + product",
+      "keyPoints": [
+        "Include every product before storing this result cell."
+      ],
+      "state": {
+        "previousSum": 5,
+        "product": 14,
+        "runningSum": 19,
+        "terms": [
+          5,
+          14
+        ],
+        "result": [
+          [
+            null,
+            null
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 9,
+      "stage": "calculate",
+      "action": "store-cell",
+      "title": "Store C at row 1, column 1",
+      "explanation": "All 2 pairs have been multiplied and added. Store 19 in this cell.",
+      "formula": "C[i][j] = sum(A[i][k] * B[k][j], k = 0..columns(A)-1)",
+      "keyPoints": [
+        "Do not move to the next cell until the current row-column calculation is complete."
+      ],
+      "state": {
+        "result": [
+          [
+            19,
+            null
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": [
+        {
+          "matrix": "C",
+          "row": 0,
+          "column": 0
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "stage": "calculate",
+      "action": "select-row-column",
+      "title": "Select row 1 and column 2",
+      "explanation": "To calculate C at row 1, column 2, use row 1 of A (1, 2) and column 2 of B (6, 8). Match entries by their position. Start the running sum at 0.",
+      "formula": "C[i][j] = sum(A[i][k] * B[k][j], k = 0..columns(A)-1)",
+      "keyPoints": [
+        "Matrix multiplication uses a row from A and a column from B, not entry-by-entry multiplication."
+      ],
+      "state": {
+        "row": [
+          1,
+          2
+        ],
+        "column": [
+          6,
+          8
+        ],
+        "runningSum": 0,
+        "result": [
+          [
+            19,
+            null
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": [
+        {
+          "matrix": "C",
+          "row": 0,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "stage": "calculate",
+      "action": "multiply-pair",
+      "title": "Multiply pair 1",
+      "explanation": "Multiply 1 from A by 6 from B: 1 * 6 = 6.",
+      "formula": "product = A[0][0] * B[0][1]",
+      "keyPoints": [
+        "Only matching positions in the selected row and column are paired."
+      ],
+      "state": {
+        "product": 6,
+        "terms": [
+          6
+        ],
+        "runningSum": 0,
+        "result": [
+          [
+            19,
+            null
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": [
+        {
+          "matrix": "A",
+          "row": 0,
+          "column": 0
+        },
+        {
+          "matrix": "B",
+          "row": 0,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "id": 12,
+      "stage": "calculate",
+      "action": "add-product",
+      "title": "Add product 1 to the running sum",
+      "explanation": "The previous sum is 0. Add the product 6: 0 + 6 = 6.",
+      "formula": "newSum = previousSum + product",
+      "keyPoints": [
+        "Include every product before storing this result cell."
+      ],
+      "state": {
+        "previousSum": 0,
+        "product": 6,
+        "runningSum": 6,
+        "terms": [
+          6
+        ],
+        "result": [
+          [
+            19,
+            null
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 13,
+      "stage": "calculate",
+      "action": "multiply-pair",
+      "title": "Multiply pair 2",
+      "explanation": "Multiply 2 from A by 8 from B: 2 * 8 = 16.",
+      "formula": "product = A[0][1] * B[1][1]",
+      "keyPoints": [
+        "Only matching positions in the selected row and column are paired."
+      ],
+      "state": {
+        "product": 16,
+        "terms": [
+          6,
+          16
+        ],
+        "runningSum": 6,
+        "result": [
+          [
+            19,
+            null
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": [
+        {
+          "matrix": "A",
+          "row": 0,
+          "column": 1
+        },
+        {
+          "matrix": "B",
+          "row": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "id": 14,
+      "stage": "calculate",
+      "action": "add-product",
+      "title": "Add product 2 to the running sum",
+      "explanation": "The previous sum is 6. Add the product 16: 6 + 16 = 22.",
+      "formula": "newSum = previousSum + product",
+      "keyPoints": [
+        "Include every product before storing this result cell."
+      ],
+      "state": {
+        "previousSum": 6,
+        "product": 16,
+        "runningSum": 22,
+        "terms": [
+          6,
+          16
+        ],
+        "result": [
+          [
+            19,
+            null
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 15,
+      "stage": "calculate",
+      "action": "store-cell",
+      "title": "Store C at row 1, column 2",
+      "explanation": "All 2 pairs have been multiplied and added. Store 22 in this cell.",
+      "formula": "C[i][j] = sum(A[i][k] * B[k][j], k = 0..columns(A)-1)",
+      "keyPoints": [
+        "Do not move to the next cell until the current row-column calculation is complete."
+      ],
+      "state": {
+        "result": [
+          [
+            19,
+            22
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": [
+        {
+          "matrix": "C",
+          "row": 0,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "id": 16,
+      "stage": "calculate",
+      "action": "select-row-column",
+      "title": "Select row 2 and column 1",
+      "explanation": "To calculate C at row 2, column 1, use row 2 of A (3, 4) and column 1 of B (5, 7). Match entries by their position. Start the running sum at 0.",
+      "formula": "C[i][j] = sum(A[i][k] * B[k][j], k = 0..columns(A)-1)",
+      "keyPoints": [
+        "Matrix multiplication uses a row from A and a column from B, not entry-by-entry multiplication."
+      ],
+      "state": {
+        "row": [
+          3,
+          4
+        ],
+        "column": [
+          5,
+          7
+        ],
+        "runningSum": 0,
+        "result": [
+          [
+            19,
+            22
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": [
+        {
+          "matrix": "C",
+          "row": 1,
+          "column": 0
+        }
+      ]
+    },
+    {
+      "id": 17,
+      "stage": "calculate",
+      "action": "multiply-pair",
+      "title": "Multiply pair 1",
+      "explanation": "Multiply 3 from A by 5 from B: 3 * 5 = 15.",
+      "formula": "product = A[1][0] * B[0][0]",
+      "keyPoints": [
+        "Only matching positions in the selected row and column are paired."
+      ],
+      "state": {
+        "product": 15,
+        "terms": [
+          15
+        ],
+        "runningSum": 0,
+        "result": [
+          [
+            19,
+            22
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": [
+        {
+          "matrix": "A",
+          "row": 1,
+          "column": 0
+        },
+        {
+          "matrix": "B",
+          "row": 0,
+          "column": 0
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "stage": "calculate",
+      "action": "add-product",
+      "title": "Add product 1 to the running sum",
+      "explanation": "The previous sum is 0. Add the product 15: 0 + 15 = 15.",
+      "formula": "newSum = previousSum + product",
+      "keyPoints": [
+        "Include every product before storing this result cell."
+      ],
+      "state": {
+        "previousSum": 0,
+        "product": 15,
+        "runningSum": 15,
+        "terms": [
+          15
+        ],
+        "result": [
+          [
+            19,
+            22
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 19,
+      "stage": "calculate",
+      "action": "multiply-pair",
+      "title": "Multiply pair 2",
+      "explanation": "Multiply 4 from A by 7 from B: 4 * 7 = 28.",
+      "formula": "product = A[1][1] * B[1][0]",
+      "keyPoints": [
+        "Only matching positions in the selected row and column are paired."
+      ],
+      "state": {
+        "product": 28,
+        "terms": [
+          15,
+          28
+        ],
+        "runningSum": 15,
+        "result": [
+          [
+            19,
+            22
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": [
+        {
+          "matrix": "A",
+          "row": 1,
+          "column": 1
+        },
+        {
+          "matrix": "B",
+          "row": 1,
+          "column": 0
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "stage": "calculate",
+      "action": "add-product",
+      "title": "Add product 2 to the running sum",
+      "explanation": "The previous sum is 15. Add the product 28: 15 + 28 = 43.",
+      "formula": "newSum = previousSum + product",
+      "keyPoints": [
+        "Include every product before storing this result cell."
+      ],
+      "state": {
+        "previousSum": 15,
+        "product": 28,
+        "runningSum": 43,
+        "terms": [
+          15,
+          28
+        ],
+        "result": [
+          [
+            19,
+            22
+          ],
+          [
+            null,
+            null
+          ]
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 21,
+      "stage": "calculate",
+      "action": "store-cell",
+      "title": "Store C at row 2, column 1",
+      "explanation": "All 2 pairs have been multiplied and added. Store 43 in this cell.",
+      "formula": "C[i][j] = sum(A[i][k] * B[k][j], k = 0..columns(A)-1)",
+      "keyPoints": [
+        "Do not move to the next cell until the current row-column calculation is complete."
+      ],
+      "state": {
+        "result": [
+          [
+            19,
+            22
+          ],
+          [
+            43,
+            null
+          ]
+        ]
+      },
+      "highlights": [
+        {
+          "matrix": "C",
+          "row": 1,
+          "column": 0
+        }
+      ]
+    },
+    {
+      "id": 22,
+      "stage": "calculate",
+      "action": "select-row-column",
+      "title": "Select row 2 and column 2",
+      "explanation": "To calculate C at row 2, column 2, use row 2 of A (3, 4) and column 2 of B (6, 8). Match entries by their position. Start the running sum at 0.",
+      "formula": "C[i][j] = sum(A[i][k] * B[k][j], k = 0..columns(A)-1)",
+      "keyPoints": [
+        "Matrix multiplication uses a row from A and a column from B, not entry-by-entry multiplication."
+      ],
+      "state": {
+        "row": [
+          3,
+          4
+        ],
+        "column": [
+          6,
+          8
+        ],
+        "runningSum": 0,
+        "result": [
+          [
+            19,
+            22
+          ],
+          [
+            43,
+            null
+          ]
+        ]
+      },
+      "highlights": [
+        {
+          "matrix": "C",
+          "row": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "id": 23,
+      "stage": "calculate",
+      "action": "multiply-pair",
+      "title": "Multiply pair 1",
+      "explanation": "Multiply 3 from A by 6 from B: 3 * 6 = 18.",
+      "formula": "product = A[1][0] * B[0][1]",
+      "keyPoints": [
+        "Only matching positions in the selected row and column are paired."
+      ],
+      "state": {
+        "product": 18,
+        "terms": [
+          18
+        ],
+        "runningSum": 0,
+        "result": [
+          [
+            19,
+            22
+          ],
+          [
+            43,
+            null
+          ]
+        ]
+      },
+      "highlights": [
+        {
+          "matrix": "A",
+          "row": 1,
+          "column": 0
+        },
+        {
+          "matrix": "B",
+          "row": 0,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "id": 24,
+      "stage": "calculate",
+      "action": "add-product",
+      "title": "Add product 1 to the running sum",
+      "explanation": "The previous sum is 0. Add the product 18: 0 + 18 = 18.",
+      "formula": "newSum = previousSum + product",
+      "keyPoints": [
+        "Include every product before storing this result cell."
+      ],
+      "state": {
+        "previousSum": 0,
+        "product": 18,
+        "runningSum": 18,
+        "terms": [
+          18
+        ],
+        "result": [
+          [
+            19,
+            22
+          ],
+          [
+            43,
+            null
+          ]
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 25,
+      "stage": "calculate",
+      "action": "multiply-pair",
+      "title": "Multiply pair 2",
+      "explanation": "Multiply 4 from A by 8 from B: 4 * 8 = 32.",
+      "formula": "product = A[1][1] * B[1][1]",
+      "keyPoints": [
+        "Only matching positions in the selected row and column are paired."
+      ],
+      "state": {
+        "product": 32,
+        "terms": [
+          18,
+          32
+        ],
+        "runningSum": 18,
+        "result": [
+          [
+            19,
+            22
+          ],
+          [
+            43,
+            null
+          ]
+        ]
+      },
+      "highlights": [
+        {
+          "matrix": "A",
+          "row": 1,
+          "column": 1
+        },
+        {
+          "matrix": "B",
+          "row": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "id": 26,
+      "stage": "calculate",
+      "action": "add-product",
+      "title": "Add product 2 to the running sum",
+      "explanation": "The previous sum is 18. Add the product 32: 18 + 32 = 50.",
+      "formula": "newSum = previousSum + product",
+      "keyPoints": [
+        "Include every product before storing this result cell."
+      ],
+      "state": {
+        "previousSum": 18,
+        "product": 32,
+        "runningSum": 50,
+        "terms": [
+          18,
+          32
+        ],
+        "result": [
+          [
+            19,
+            22
+          ],
+          [
+            43,
+            null
+          ]
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 27,
+      "stage": "calculate",
+      "action": "store-cell",
+      "title": "Store C at row 2, column 2",
+      "explanation": "All 2 pairs have been multiplied and added. Store 50 in this cell.",
+      "formula": "C[i][j] = sum(A[i][k] * B[k][j], k = 0..columns(A)-1)",
+      "keyPoints": [
+        "Do not move to the next cell until the current row-column calculation is complete."
+      ],
+      "state": {
+        "result": [
+          [
+            19,
+            22
+          ],
+          [
+            43,
+            50
+          ]
+        ]
+      },
+      "highlights": [
+        {
+          "matrix": "C",
+          "row": 1,
+          "column": 1
+        }
+      ]
+    },
+    {
+      "id": 28,
+      "stage": "complete",
+      "action": "final-result",
+      "title": "The result matrix is complete",
+      "explanation": "Every result cell has been calculated. The result matrix is shown in state.result.",
+      "formula": "C[i][j] = sum(A[i][k] * B[k][j], k = 0..columns(A)-1)",
+      "keyPoints": [
+        "The number of columns in A must equal the number of rows in B.",
+        "Review the earlier steps to see how each entry was obtained."
+      ],
+      "state": {
+        "result": [
+          [
+            19,
+            22
+          ],
+          [
+            43,
+            50
+          ]
+        ]
+      },
+      "highlights": []
+    }
+  ],
+  "summary": {
+    "totalSteps": 28,
+    "keyPoints": [
+      "The number of columns in A must equal the number of rows in B."
+    ]
+  }
+}
