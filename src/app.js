@@ -1,10 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import express from 'express';
+import compression from 'compression';
 import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import { calculateMatrix } from './algorithms/matrix.js';
 import { convertNumber } from './algorithms/number-system.js';
-import { InputError } from './common.js';
+import { checkPractice } from './algorithms/practice.js';
+import { InputError, parseDetail } from './common.js';
 import { loadConfig } from './config.js';
 import openapi from '../docs/openapi.json' with { type: 'json' };
 
@@ -45,6 +47,8 @@ export function createApp(options = {}) {
   });
 
   app.use(helmet());
+  // gzip responses (the step traces are large and compress well). Honors Accept-Encoding.
+  app.use(compression());
   app.use((req, res, next) => {
     res.set('Cache-Control', 'no-store');
     const origin = req.get('Origin');
@@ -86,6 +90,8 @@ export function createApp(options = {}) {
       matrixRows: 8, matrixColumns: 8, matrixAbsoluteEntry: 1000000, determinantSize: 4, sourceDigits: 64, bodyBytes: BODY_LIMIT_BYTES,
       rateLimit: { requests: config.rateLimit.max, windowSeconds: config.rateLimit.windowMs / 1000 }
     },
+    optionalRoutes: ['POST /api/practice/check'],
+    detailLevels: ['full', 'compact', 'beginner'],
     supportedBases: [2, 8, 10, 16],
     openapi: '/api/openapi.json'
   }));
@@ -107,11 +113,15 @@ export function createApp(options = {}) {
   };
   for (const operation of MATRIX_OPERATIONS) {
     app.route(`/api/matrix/${operation}`)
-      .post((req, res) => res.json(calculateMatrix(operation, req.body)))
+      .post((req, res) => res.json(calculateMatrix(operation, req.body, { detail: parseDetail(req.query.detail) })))
       .all(methodNotAllowed('POST, OPTIONS'));
   }
   app.route('/api/number-system/convert')
-    .post((req, res) => res.json(convertNumber(req.body)))
+    .post((req, res) => res.json(convertNumber(req.body, { detail: parseDetail(req.query.detail) })))
+    .all(methodNotAllowed('POST, OPTIONS'));
+
+  app.route('/api/practice/check')
+    .post((req, res) => res.json(checkPractice(req.body)))
     .all(methodNotAllowed('POST, OPTIONS'));
 
   app.use((req, res) => failure(res, 404, 'NOT_FOUND', 'Route not found. GET /api lists supported routes.'));

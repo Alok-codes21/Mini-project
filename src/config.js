@@ -38,7 +38,13 @@ export function loadConfig(env = process.env) {
   }
   const production = nodeEnv === 'production';
   const trustProxy = env.TRUST_PROXY ?? '';
+  // Warnings are returned, not printed here, so tests and tools can read them. server.js logs them.
+  const warnings = [];
+  if (production && (env.TRUST_PROXY === undefined || env.TRUST_PROXY === '')) {
+    warnings.push('TRUST_PROXY is not set while NODE_ENV=production. Behind a proxy such as Render, every client then shares one IP and one rate-limit bucket. Set TRUST_PROXY=1 (number of proxy hops).');
+  }
   return {
+    warnings,
     nodeEnv,
     port: integer(env, 'PORT', 3000, 1, 65535),
     // Production: only listed origins. Development with an empty list: any localhost origin.

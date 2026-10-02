@@ -9,6 +9,7 @@ try {
   console.error(`Configuration error: ${error.message}`);
   process.exit(1);
 }
+for (const message of config.warnings ?? []) console.warn(JSON.stringify({ level: 'warn', msg: message }));
 const server = createApp(config).listen(config.port, () => {
   console.log(JSON.stringify({ level: 'info', msg: 'listening', port: config.port, env: config.nodeEnv }));
 });
