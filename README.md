@@ -87,7 +87,7 @@ All matrix and number-system routes accept an optional query parameter `detail`:
 | `compact` | Fewer steps: setup, one step per result cell (matrices), one per digit read and one per remainder (number conversion), one per cofactor term and minor result (determinants), and the final steps. Same `result`. Step ids stay sequential. |
 | `beginner` | The full trace plus one leading `before-you-start` step that explains matrices (rows, columns, entries) or place value. |
 
-Any other value (including an empty or repeated one) returns `400 INVALID_INPUT` with `error.field` set to `detail`. For `compact` and `beginner`, `summary.detail` echoes the choice. An 8 x 8 multiplication drops from 1,156 steps to 68 with `compact`.
+Any other value (including an empty or repeated one) returns `400 INVALID_INPUT` with `error.field` set to `detail`. Every matrix and number-system response has a top-level `detail` field with the mode used: `full` (the default when the parameter is omitted), `compact` or `beginner`. For `compact` and `beginner`, `summary.detail` also echoes the choice. An 8 x 8 multiplication drops from 1,156 steps to 68 with `compact`.
 
 Responses are gzip-compressed when the client sends `Accept-Encoding: gzip` (browsers and `fetch` do this automatically).
 
@@ -106,14 +106,14 @@ Body: `operation` (`add`, `subtract`, `transpose`, `multiply`, `determinant` or 
   "firstWrongStep": {
     "id": 22, "stage": "calculate", "action": "select-row-column",
     "title": "Select row 2 and column 2",
-    "explanation": "...", "highlights": [{ "matrix": "C", "row": 1, "column": 1 }],
+    "highlights": [{ "matrix": "C", "row": 1, "column": 1 }],
     "reason": "cell-mismatch", "confidence": "medium",
     "hint": "This is the first result cell (in calculation order) that does not match. Redo its calculation from here."
   }
 }
 ```
 
-`firstWrongStep.id` is a step id in the full trace of the same question, so a frontend can jump to it. The step is a best guess, and `confidence` says how good: `high` for wrong dimensions, a running total that stopped early, a reversed digit order or an invalid digit; `medium` for a mismatching cell or a sign or skipped-term pattern; `low` when nothing recognizable fits and the first step to re-check is returned. Matrix cells are compared in the order the trace calculates them; numbers within a relative `1e-9` count as equal; conversion answers ignore case and leading zeros. Invalid `operation`, `input` or `answer` return `400 INVALID_INPUT` with the offending `field`.
+`firstWrongStep` has only `id`, `stage`, `action`, `title`, `highlights`, `reason`, `confidence` and `hint`. It has no `explanation`, because that text can state the correct result. A learner can fetch the full step text from the normal endpoint (for example `POST /api/matrix/multiply`) and look up the step with the returned `id`. That id is a step id in the full trace of the same question, so a frontend can jump to it. The step is a best guess, and `confidence` says how good: `high` for wrong dimensions, a running total that stopped early, a reversed digit order or an invalid digit; `medium` for a mismatching cell or a sign or skipped-term pattern; `low` when nothing recognizable fits and the first step to re-check is returned. Matrix cells are compared in the order the trace calculates them; numbers within a relative `1e-9` count as equal; conversion answers ignore case and leading zeros. Invalid `operation`, `input` or `answer` return `400 INVALID_INPUT` with the offending `field`.
 
 Learning levels are labels for ordering lessons, not a locked progression or user-account system. The backend is stateless.
 
@@ -381,7 +381,7 @@ Run `npm test` (Node's built-in test runner; no extra test dependency). No linte
 - All 16 base combinations across 200 integers, 64-digit inputs and random 200-bit values checked against BigInt, and strict number-format rejection (prefixes, signs, spaces, fractions, exponents, bad digits, bad bases).
 - Live HTTP: response contract, error shape for every status, malformed JSON, wrong content type, unsupported and corrupt encoding, body limits, 404/405, security headers, request ids, CORS (configured, development and production defaults, preflight), rate limiting.
 - Environment validation (ports, rate limits, production CORS) and the production `TRUST_PROXY` warning.
-- `?detail=` levels, gzip, rounding notes, error fields, 1-based `displayFormula`, `Why:` lines, the practice endpoint, `render.yaml` and the CI workflow (`test/improvements.test.js`).
+- `?detail=` levels, gzip, rounding notes, error fields, 1-based `displayFormula`, `Why:` lines, the practice endpoint, `render.yaml` and the CI workflow (`test/improvements.test.js`), plus the practice answer-leak and `detail` echo checks (`test/round3.test.js`).
 
 GitHub Actions (`.github/workflows/ci.yml`) runs `npm ci` and `npm test` on Node 22 for every push and pull request.
 
