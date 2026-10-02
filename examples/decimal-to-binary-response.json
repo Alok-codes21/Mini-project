@@ -3,6 +3,7 @@
   "schemaVersion": "1.0",
   "module": "number-system",
   "operation": "convert",
+  "detail": "full",
   "level": "beginner",
   "input": {
     "number": "13",
