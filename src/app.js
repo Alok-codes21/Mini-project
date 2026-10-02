@@ -7,6 +7,7 @@ import { calculateMatrix } from './algorithms/matrix.js';
 import { convertNumber } from './algorithms/number-system.js';
 import { checkPractice } from './algorithms/practice.js';
 import { InputError, parseDetail } from './common.js';
+import { addStyleHints } from './style.js';
 import { loadConfig } from './config.js';
 import openapi from '../docs/openapi.json' with { type: 'json' };
 
@@ -23,6 +24,9 @@ function corsOriginAllowed(origin, config) {
   // Development convenience only: with no configured origins, any localhost origin works.
   return config.nodeEnv !== 'production' && config.corsOrigins.length === 0 && LOCALHOST_ORIGIN.test(origin);
 }
+
+// ?style=hints adds colour hints (module accent, palette, per-step role). Off by default.
+const withStyle = (req, response) => (req.query.style === 'hints' ? addStyleHints(response) : response);
 
 // options override environment-derived settings; tests use this to build isolated apps.
 export function createApp(options = {}) {
@@ -113,11 +117,11 @@ export function createApp(options = {}) {
   };
   for (const operation of MATRIX_OPERATIONS) {
     app.route(`/api/matrix/${operation}`)
-      .post((req, res) => res.json(calculateMatrix(operation, req.body, { detail: parseDetail(req.query.detail) })))
+      .post((req, res) => res.json(withStyle(req, calculateMatrix(operation, req.body, { detail: parseDetail(req.query.detail) }))))
       .all(methodNotAllowed('POST, OPTIONS'));
   }
   app.route('/api/number-system/convert')
-    .post((req, res) => res.json(convertNumber(req.body, { detail: parseDetail(req.query.detail) })))
+    .post((req, res) => res.json(withStyle(req, convertNumber(req.body, { detail: parseDetail(req.query.detail) }))))
     .all(methodNotAllowed('POST, OPTIONS'));
 
   app.route('/api/practice/check')
