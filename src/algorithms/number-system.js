@@ -1,7 +1,7 @@
 import { InputError, requireObject, trace, finish } from '../common.js';
 const DIGITS = '0123456789ABCDEF';
 const BASES = [2, 8, 10, 16];
-function expand(digits, base, t, stage, label) {
+function expand(digits, base, t, stage, label, compact) {
   let total = 0n;
   const b = BigInt(base);
   const formula = 'decimalValue = sum(digitValue * base^position), positions counted from the right starting at 0';
@@ -27,7 +27,7 @@ function expand(digits, base, t, stage, label) {
       'contribution = digitValue * placeValue', ['A zero digit contributes 0 but still occupies a place.'], { contribution: contribution.toString(), digitValue: value, placeValue: place.toString() });
     const previous = total; total += contribution;
     t.add(stage, 'add-contribution', `Add digit ${index + 1} to the total`,
-      `${previous} + ${contribution} = ${total}.`, 'newTotal = previousTotal + contribution',
+      compact ? `Digit ${symbol} (value ${value}) at position ${position} contributes ${value} * ${place} = ${contribution}: ${previous} + ${contribution} = ${total}.` : `${previous} + ${contribution} = ${total}.`, 'newTotal = previousTotal + contribution',
       ['Include every digit, even a zero.'], { previousTotal: previous.toString(), contribution: contribution.toString(), runningTotal: total.toString() });
   }
   t.add(stage, 'finish-positional-expansion', `Finish reading ${label}`,
@@ -35,7 +35,10 @@ function expand(digits, base, t, stage, label) {
     ['Magnitude means the value without its sign.'], { decimalMagnitude: total.toString() });
   return total;
 }
-export function convertNumber(body) {
+// ?detail=compact keeps setup, one step per digit read and per remainder, and the closing steps.
+const COMPACT_ACTIONS = new Set(['validate-digits', 'add-contribution', 'decimal-output', 'zero-case', 'start-division', 'record-remainder', 'reverse-remainders', 'restore-sign', 'compare-values']);
+export function convertNumber(body, { detail = 'full' } = {}) {
+  const compact = detail === 'compact';
   requireObject(body);
   const { number, fromBase, toBase } = body;
   if (!BASES.includes(fromBase)) throw new InputError('fromBase must be the number 2, 8, 10 or 16.', 'fromBase');
@@ -49,11 +52,14 @@ export function convertNumber(body) {
   }
   const digits = rawDigits.replace(/^0+(?=.)/, '');
   const t = trace();
+  if (detail === 'beginner') t.add('intro', 'before-you-start', 'Before you start: place value',
+    'A number system writes values with a fixed set of digits. Each place has a value: in base 10 the places are 1, 10, 100 and so on, so 305 means 3 * 100 + 0 * 10 + 5 * 1. Other bases work the same way, with places that are powers of the base (base 2: 1, 2, 4, 8; base 16: 1, 16, 256). Base 16 also uses the letters A to F for the values 10 to 15.',
+    'decimalValue = sum(digitValue * base^position)', ['Positions are counted from the right, starting at 0.'], { example: { number: '305', base: 10 } });
   t.add('understand', 'validate-digits', 'Check the input and bases',
     `${number} is valid in base ${fromBase}. Each digit must be between 0 and ${fromBase - 1}. We will convert its magnitude first, then restore a negative sign if needed.`,
     '0 <= digitValue < sourceBase', ['This endpoint converts signed integers, not fractions or two\'s-complement bit patterns.', 'Exact integer arithmetic is used, even beyond JavaScript\'s safe-number range.'],
     { original: number, digits, negative, fromBase, toBase });
-  const magnitude = expand(digits, fromBase, t, 'decode', 'the input');
+  const magnitude = expand(digits, fromBase, t, 'decode', 'the input', compact);
   let outputDigits;
   const rule = 'value = quotient * targetBase + remainder; 0 <= remainder < targetBase';
   if (toBase === 10) {
@@ -82,7 +88,7 @@ export function convertNumber(body) {
       const remainder = current - covered;
       remainders.push(DIGITS[Number(remainder)]);
       t.add('encode', 'record-remainder', `Record remainder ${remainders.length}`,
-        `${current} - ${covered} = ${remainder}. The remainder ${remainder} is written as ${DIGITS[Number(remainder)]} in base ${toBase}.`,
+        compact ? `${current} = ${quotient} * ${toBase} + ${remainder}. The remainder ${remainder} is written as ${DIGITS[Number(remainder)]} in base ${toBase}.` : `${current} - ${covered} = ${remainder}. The remainder ${remainder} is written as ${DIGITS[Number(remainder)]} in base ${toBase}.`,
         'remainder = currentValue - quotient * targetBase', ['A remainder is always smaller than the target base.', 'These digits are recorded from the smallest place to the largest place.'],
         { remainder: remainder.toString(), digit: DIGITS[Number(remainder)], remainders });
       current = quotient;
@@ -103,12 +109,13 @@ export function convertNumber(body) {
     hasNegativeSign ? `The original value was negative. Put a minus sign before ${outputDigits}: ${result}.`
       : `Use ${result} without a minus sign${magnitude === 0n ? '; zero has no negative sign' : ''}.`,
     'signedResult = sign + magnitudeDigits', ['This is signed mathematical notation, not a fixed-width machine encoding.'], { result });
-  const verified = expand(outputDigits, toBase, t, 'verify', 'the result');
+  const verified = expand(outputDigits, toBase, t, 'verify', 'the result', compact);
   if (verified !== magnitude) throw new Error('Conversion verification failed.');
   t.add('verify', 'compare-values', 'Verify that the value is unchanged',
     `Reading the result in base ${toBase} gives magnitude ${verified}, which matches the original magnitude ${magnitude}. With the original sign, both represent ${hasNegativeSign ? '-' : ''}${magnitude} in decimal.`,
     'decodedOutputMagnitude = decodedInputMagnitude', ['Changing the base changes the written digits, not the number\'s value.'],
     { passed: true, originalDecimal: `${hasNegativeSign ? '-' : ''}${magnitude}`, verifiedDecimal: `${hasNegativeSign ? '-' : ''}${verified}` });
+  if (compact) t.compact(step => COMPACT_ACTIONS.has(step.action));
   return finish('number-system', 'convert', fromBase === 10 || toBase === 10 ? 'beginner' : 'intermediate',
-    { number, fromBase, toBase }, result, t, ['Decode the source digits by place value.', 'Encode the magnitude in the target base.', 'Verify the output by converting it back by place value.']);
+    { number, fromBase, toBase }, result, t, ['Decode the source digits by place value.', 'Encode the magnitude in the target base.', 'Verify the output by converting it back by place value.'], { detail });
 }

@@ -25,16 +25,23 @@ function matrix(value, name) {
 }
 // Every computed value passes through here. It cleans binary floating-point noise
 // (0.1 + 0.2 -> 0.3), turns -0 into 0, and refuses results that cannot be shown accurately.
-function checked(value) {
+// Rounding is to 15 significant digits. `notes` collects a message when rounding changed a value.
+// `field` names what to fix in an error: "A", "B", or "result" (a computed value, the default).
+const ROUNDING_NOTE = 'Some values were rounded to 15 significant digits to remove floating-point noise (for example 0.30000000000000004 is shown as 0.3).';
+export function checked(value, field = 'result', notes) {
   if (!Number.isFinite(value) || Math.abs(value) > Number.MAX_SAFE_INTEGER) {
-    throw new InputError('The calculation produces numbers too large to show exactly. Use smaller entries.', 'A', { code: 'RESULT_TOO_LARGE', status: 422 });
+    throw new InputError('The calculation produces numbers too large to show exactly. Use smaller entries in A and B.', field, { code: 'RESULT_TOO_LARGE', status: 422 });
   }
   const clean = Number.isInteger(value) ? value : Number(value.toPrecision(15));
+  if (notes && clean !== value && !Number.isInteger(value) && !notes.includes(ROUNDING_NOTE)) notes.push(ROUNDING_NOTE);
   return clean === 0 ? 0 : clean;
 }
+// ?detail=compact keeps these steps only: setup, one step per result cell, and the final result.
+// For determinants it also keeps one step per cofactor term and minor result.
+const COMPACT_ACTIONS = new Set(['inspect-dimensions', 'check-rule', 'create-result', 'store-cell', 'final-result', 'base-case', 'cofactor-product', 'return-determinant']);
 const dims = m => `${m.length} x ${m[0].length}`;
 const point = (matrix, row, column) => ({ matrix, row, column });
-export function calculateMatrix(operation, body) {
+export function calculateMatrix(operation, body, { detail = 'full' } = {}) {
   requireObject(body);
   const allowed = ['add', 'subtract', 'transpose', 'multiply', 'determinant'];
   if (!allowed.includes(operation)) throw new InputError('Unknown matrix operation.', 'operation');
@@ -43,6 +50,9 @@ export function calculateMatrix(operation, body) {
   const B = unary ? undefined : matrix(body.B, 'B');
   const input = unary ? { A } : { A, B };
   const t = trace();
+  const notes = [];
+  const check = (value, field) => checked(value, field, notes);
+  const compact = detail === 'compact';
   const r = A.length, c = A[0].length;
   const rules = {
     add: 'The matrices must have the same number of rows and columns.',
@@ -55,6 +65,9 @@ export function calculateMatrix(operation, body) {
   if (operation === 'multiply' && c !== B.length) throw new InputError(rules.multiply, 'B');
   if (operation === 'determinant' && r !== c) throw new InputError(rules.determinant, 'A');
   if (operation === 'determinant' && r > 4) throw new InputError('For readable cofactor explanations, determinants support at most 4 x 4 matrices.', 'A');
+  if (detail === 'beginner') t.add('intro', 'before-you-start', 'Before you start: matrices',
+    'A matrix is a rectangular grid of numbers. A row runs left to right. A column runs top to bottom. Each number is an entry, and its position is named by its row and column. The matrix [[1, 2], [3, 4]] has 2 rows and 2 columns; the entry in row 1, column 2 is 2.',
+    'size = rows x columns', ['The data uses 0-based indices (A[0][0] is the first entry); the explanations count from 1, and displayFormula uses the same 1-based numbers.'], { example: [[1, 2], [3, 4]] });
   t.add('understand', 'inspect-dimensions', 'Read the matrix dimensions',
     `A has ${r} rows and ${c} columns${B ? `; B has ${B.length} rows and ${B[0].length} columns` : ''}. A row runs horizontally and a column runs vertically.`,
     'dimensions = number of rows x number of columns', [rules[operation], 'Array indices start at 0; explanation labels start at 1.'],
@@ -70,10 +83,11 @@ export function calculateMatrix(operation, body) {
       : `Both matrices have dimensions ${dims(A)}, so corresponding entries can be ${operation === 'add' ? 'added' : 'subtracted'}.`,
     formula, [rules[operation]], { valid: true });
   if (operation === 'determinant') {
-    const result = determinant(A, t, 'A', 0);
+    const result = determinant(A, t, 'A', 0, check);
     t.add('complete', 'final-result', 'The determinant is complete', `The determinant of A is ${result}.`, formula,
       ['A determinant is one number, not a matrix.', 'A zero determinant means the square matrix is singular.'], { result });
-    return finish('matrix', operation, 'advanced', input, result, t, [rules[operation], 'Uses recursive cofactor expansion along the first row.']);
+    if (compact) t.compact(step => COMPACT_ACTIONS.has(step.action));
+    return finish('matrix', operation, 'advanced', input, result, t, [rules[operation], 'Uses recursive cofactor expansion along the first row.'], { detail, notes });
   }
   const rows = operation === 'transpose' ? c : r;
   const cols = operation === 'transpose' ? r : operation === 'multiply' ? B[0].length : c;
@@ -91,12 +105,12 @@ export function calculateMatrix(operation, body) {
         formula, ['Matrix multiplication uses a row from A and a column from B, not entry-by-entry multiplication.'],
         { row, column, runningSum: 0, result: C }, [point('C', i, j)]);
       for (let k = 0; k < c; k++) {
-        const product = checked(A[i][k] * B[k][j]); terms.push(product);
+        const product = check(A[i][k] * B[k][j]); terms.push(product);
         t.add('calculate', 'multiply-pair', `Multiply pair ${k + 1}`,
           `Multiply ${A[i][k]} from A by ${B[k][j]} from B: ${A[i][k]} * ${B[k][j]} = ${product}.`,
           `product = A[${i}][${k}] * B[${k}][${j}]`, ['Only matching positions in the selected row and column are paired.'],
           { product, terms, runningSum: sum, result: C }, [point('A', i, k), point('B', k, j)]);
-        const previous = sum; sum = checked(sum + product);
+        const previous = sum; sum = check(sum + product);
         t.add('calculate', 'add-product', `Add product ${k + 1} to the running sum`,
           `The previous sum is ${previous}. Add the product ${product}: ${previous} + ${product} = ${sum}.`,
           'newSum = previousSum + product', ['Include every product before storing this result cell.'],
@@ -104,7 +118,8 @@ export function calculateMatrix(operation, body) {
       }
       C[i][j] = sum;
       t.add('calculate', 'store-cell', `Store C at row ${i + 1}, column ${j + 1}`,
-        `All ${c} pairs have been multiplied and added. Store ${sum} in this cell.`, formula,
+        compact ? `C at row ${i + 1}, column ${j + 1} = ${row.map((a, k) => `${a} * ${column[k]}`).join(' + ')} = ${sum}. Store ${sum} in this cell.`
+          : `All ${c} pairs have been multiplied and added. Store ${sum} in this cell.`, formula,
         ['Do not move to the next cell until the current row-column calculation is complete.'], { result: C }, [point('C', i, j)]);
     } else if (operation === 'transpose') {
       t.add('calculate', 'select-entry', `Read A at row ${i + 1}, column ${j + 1}`,
@@ -112,27 +127,28 @@ export function calculateMatrix(operation, body) {
         ['Transposing moves entries; it does not change their values.'], { value: A[i][j], result: C }, [point('A', i, j)]);
       C[j][i] = A[i][j];
       t.add('calculate', 'store-cell', `Write C at row ${j + 1}, column ${i + 1}`,
-        `Write ${A[i][j]} at the swapped position.`, formula, [rules.transpose], { result: C }, [point('C', j, i)]);
+        compact ? `A at row ${i + 1}, column ${j + 1} is ${A[i][j]}. Write it at row ${j + 1}, column ${i + 1} of the result.` : `Write ${A[i][j]} at the swapped position.`, formula, [rules.transpose], { result: C }, [point('C', j, i)]);
     } else {
       const symbol = operation === 'add' ? '+' : '-';
       t.add('calculate', 'select-pair', `Select row ${i + 1}, column ${j + 1}`,
         `Read ${A[i][j]} from A and ${B[i][j]} from B at the same position.`, formula,
         ['Use corresponding entries, not a row-column dot product.'], { left: A[i][j], right: B[i][j], result: C }, [point('A', i, j), point('B', i, j)]);
-      const value = checked(operation === 'add' ? A[i][j] + B[i][j] : A[i][j] - B[i][j]);
+      const value = check(operation === 'add' ? A[i][j] + B[i][j] : A[i][j] - B[i][j]);
       t.add('calculate', 'evaluate-pair', `${operation === 'add' ? 'Add' : 'Subtract'} the selected entries`,
         `${A[i][j]} ${symbol} ${B[i][j]} = ${value}.`, formula,
         [operation === 'subtract' ? 'Order matters: subtract B from A.' : 'Add the two values at this position.'], { value, result: C });
       C[i][j] = value;
       t.add('calculate', 'store-cell', `Store C at row ${i + 1}, column ${j + 1}`,
-        `Write ${value} in the result at this same position.`, formula, ['The other result cells are unchanged.'], { result: C }, [point('C', i, j)]);
+        compact ? `${A[i][j]} ${symbol} ${B[i][j]} = ${value}. Write it at row ${i + 1}, column ${j + 1} of the result.` : `Write ${value} in the result at this same position.`, formula, ['The other result cells are unchanged.'], { result: C }, [point('C', i, j)]);
     }
   }
   t.add('complete', 'final-result', 'The result matrix is complete',
     'Every result cell has been calculated. The result matrix is shown in state.result.', formula,
     [rules[operation], 'Review the earlier steps to see how each entry was obtained.'], { result: C });
-  return finish('matrix', operation, operation === 'multiply' ? 'intermediate' : 'beginner', input, C, t, [rules[operation]]);
+  if (compact) t.compact(step => COMPACT_ACTIONS.has(step.action));
+  return finish('matrix', operation, operation === 'multiply' ? 'intermediate' : 'beginner', input, C, t, [rules[operation]], { detail, notes });
 }
-function determinant(M, t, label, depth) {
+function determinant(M, t, label, depth, check) {
   const n = M.length; let total = 0;
   const rule = 'det(M) = sum(sign * firstRowEntry * minorDeterminant)';
   t.add('calculate', 'start-expansion', `Find det(${label})`,
@@ -153,16 +169,16 @@ function determinant(M, t, label, depth) {
     t.add('calculate', 'build-minor', `Build ${minorLabel}`,
       `Remove row 1 and column ${j + 1} from ${label}. The remaining entries form the ${n - 1} x ${n - 1} minor shown in state.minor.`,
       'minor = matrix with the selected row and column removed', ['Preserve the relative order of the remaining entries.'], { minor, label, minorLabel, depth });
-    const minorDet = determinant(minor, t, minorLabel, depth + 1);
-    const signedEntry = checked(sign * M[0][j]);
+    const minorDet = determinant(minor, t, minorLabel, depth + 1, check);
+    const signedEntry = check(sign * M[0][j]);
     t.add('calculate', 'apply-sign', `Apply the sign for column ${j + 1}`,
       `${sign} * ${M[0][j]} = ${signedEntry}.`, 'signedEntry = sign * firstRowEntry',
       ['Apply the sign before multiplying by the minor determinant.'], { signedEntry, minorDeterminant: minorDet, label, depth });
-    const term = checked(signedEntry * minorDet);
+    const term = check(signedEntry * minorDet);
     t.add('calculate', 'cofactor-product', `Calculate term ${j + 1} of ${label}`,
       `The minor determinant is ${minorDet}. Multiply it by the signed entry: ${signedEntry} * ${minorDet} = ${term}.`,
       'term = signedEntry * minorDeterminant', ['This term contributes to the determinant of the parent matrix.'], { term, minorDeterminant: minorDet, label, depth });
-    const previous = total; total = checked(total + term);
+    const previous = total; total = check(total + term);
     t.add('calculate', 'accumulate-term', `Add term ${j + 1} of ${label}`,
       `Start from ${previous} and add ${term}: ${previous} + ${term} = ${total}.`, 'newTotal = previousTotal + term',
       ['Calculate all first-row terms, including terms whose entry is zero.'], { previousTotal: previous, term, runningTotal: total, label, depth });
