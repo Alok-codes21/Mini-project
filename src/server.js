@@ -1,7 +1,28 @@
 import { createApp } from './app.js';
-const port = Number(process.env.PORT ?? 3000);
-if (!Number.isInteger(port) || port < 1 || port > 65535) throw new Error('PORT must be an integer from 1 to 65535.');
-const server = createApp().listen(port, () => console.log(`Learning API listening on http://localhost:${port}. GET /api lists endpoints.`));
-for (const signal of ['SIGINT', 'SIGTERM']) {
-  process.on(signal, () => server.close(() => process.exit(0)));
+import { loadConfig, loadEnvFile } from './config.js';
+
+let config;
+try {
+  loadEnvFile();
+  config = loadConfig();
+} catch (error) {
+  console.error(`Configuration error: ${error.message}`);
+  process.exit(1);
 }
+const server = createApp(config).listen(config.port, () => {
+  console.log(JSON.stringify({ level: 'info', msg: 'listening', port: config.port, env: config.nodeEnv }));
+});
+server.on('error', error => {
+  console.error(`Could not start server: ${error.message}`);
+  process.exit(1);
+});
+let closing = false;
+function shutdown(signal) {
+  if (closing) return;
+  closing = true;
+  console.log(JSON.stringify({ level: 'info', msg: 'shutting down', signal }));
+  server.close(() => process.exit(0));
+  server.closeIdleConnections();
+  setTimeout(() => process.exit(1), config.shutdownTimeoutMs).unref();
+}
+for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => shutdown(signal));
