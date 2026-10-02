@@ -1,0 +1,109 @@
+> matrix-number-system-backend@1.0.0 test
+> node --test
+
+TAP version 13
+# Subtest: add and subtract with decimals and negative entries
+ok 1 - add and subtract with decimals and negative entries
+  ---
+  duration_ms: 4.219634
+  type: 'test'
+  ...
+# Subtest: rectangular transpose and transpose twice
+ok 2 - rectangular transpose and transpose twice
+  ---
+  duration_ms: 0.557456
+  type: 'test'
+  ...
+# Subtest: approved multiplication example has separate multiply and add steps
+ok 3 - approved multiplication example has separate multiply and add steps
+  ---
+  duration_ms: 0.624873
+  type: 'test'
+  ...
+# Subtest: rectangular multiplication and single-cell multiplication
+ok 4 - rectangular multiplication and single-cell multiplication
+  ---
+  duration_ms: 1.506368
+  type: 'test'
+  ...
+# Subtest: determinants 1x1 to 4x4 and singular matrix
+ok 5 - determinants 1x1 to 4x4 and singular matrix
+  ---
+  duration_ms: 4.273935
+  type: 'test'
+  ...
+# Subtest: matrix input validation
+ok 6 - matrix input validation
+  ---
+  duration_ms: 0.64255
+  type: 'test'
+  ...
+# Subtest: 13 decimal to binary and verification trace
+ok 7 - 13 decimal to binary and verification trace
+  ---
+  duration_ms: 0.971291
+  type: 'test'
+  ...
+# Subtest: zero, minus zero, negative and lowercase hex, leading zeros, same base
+ok 8 - zero, minus zero, negative and lowercase hex, leading zeros, same base
+  ---
+  duration_ms: 1.997434
+  type: 'test'
+  ...
+# Subtest: all 16 source-target combinations across 200 exact integers
+ok 9 - all 16 source-target combinations across 200 exact integers
+  ---
+  duration_ms: 409.192908
+  type: 'test'
+  ...
+# Subtest: exact conversion beyond safe integer range and maximum source size
+ok 10 - exact conversion beyond safe integer range and maximum source size
+  ---
+  duration_ms: 27.139202
+  type: 'test'
+  ...
+# Subtest: number-system validation
+ok 11 - number-system validation
+  ---
+  duration_ms: 0.746599
+  type: 'test'
+  ...
+# Subtest: health and route discovery
+ok 12 - health and route discovery
+  ---
+  duration_ms: 38.810303
+  type: 'test'
+  ...
+# Subtest: all six operation endpoints return step explanations
+ok 13 - all six operation endpoints return step explanations
+  ---
+  duration_ms: 31.672501
+  type: 'test'
+  ...
+# Subtest: 400 on bad input or malformed JSON and 404 on missing route
+ok 14 - 400 on bad input or malformed JSON and 404 on missing route
+  ---
+  duration_ms: 13.275857
+  type: 'test'
+  ...
+# Subtest: 413 on oversized body
+ok 15 - 413 on oversized body
+  ---
+  duration_ms: 7.377821
+  type: 'test'
+  ...
+# Subtest: CORS only permits the configured origin
+ok 16 - CORS only permits the configured origin
+  ---
+  duration_ms: 6.87058
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 16
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 758.83565
