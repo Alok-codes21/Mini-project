@@ -392,3 +392,8 @@ GitHub Actions (`.github/workflows/ci.yml`) runs `npm ci` and `npm test` on Node
 ## Before a public deployment
 
 This is a stateless educational service, not a hardened production system. Deploy behind HTTPS, set `NODE_ENV=production`, `CORS_ORIGIN`, and `TRUST_PROXY`, and review rate limits for your traffic. Add authentication only if you need to restrict access.
+
+## Colour output
+
+- Terminal: `npm run explain -- multiply '{"A":[[1,2],[3,4]],"B":[[5,6],[7,8]]}'` or `node src/cli.js convert '{"number":"13","fromBase":10,"toBase":2}'`. Gold answer, grey labels, bold white text, one accent colour per module. Plain text when piped or when `NO_COLOR` is set; `--color` forces colour.
+- API: add `?style=hints` to any matrix or convert route. The response gets a `style` object (module accent hex, palette, roles) and a `styleRole` on each step. Off by default.
