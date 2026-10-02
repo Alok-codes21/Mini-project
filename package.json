@@ -1,0 +1,10 @@
+{
+  "name": "matrix-number-system-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Educational Matrix and Number System REST API with atomic learning steps",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": { "start": "node src/server.js", "dev": "node --watch src/server.js", "test": "node --test" },
+  "dependencies": { "express": "5.1.0" }
+}
