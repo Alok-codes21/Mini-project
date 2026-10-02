@@ -8,7 +8,7 @@ export const MODULE_COLORS = {
   transpose: { name: 'slate-blue', hex: '#7C8FD9', ansi: 34 },
   multiply: { name: 'violet', hex: '#A78BFA', ansi: 95 },
   determinant: { name: 'steel', hex: '#8FA3B8', ansi: 96 },
-  convert: { name: 'lavender-grey', hex: '#9CA3AF', ansi: 37 }
+  convert: { name: 'peach', hex: '#E0A07A', ansi: 37 }
 };
 
 // Which colour role a step stage uses in the images.
@@ -48,6 +48,10 @@ export function makeStyler(enabled) {
     grey: text => (enabled ? `\x1b[38;2;138;138;133m${text}\x1b[0m` : String(text)),
     bold: wrap(1, 22),
     white: wrap(97, 39),
-    accent: (key, text) => (enabled ? `\x1b[1;${MODULE_COLORS[key].ansi}m${text}\x1b[0m` : String(text))
+    accent: (key, text) => {
+      if (!enabled) return String(text);
+      const [r, g, b] = [1, 3, 5].map(i => parseInt(MODULE_COLORS[key].hex.slice(i, i + 2), 16));
+      return `\x1b[1;38;2;${r};${g};${b}m${text}\x1b[0m`;
+    }
   };
 }
