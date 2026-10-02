@@ -2,15 +2,19 @@ import { InputError, requireObject, trace, finish } from '../common.js';
 
 const MAX_SIZE = 8;
 const MAX_VALUE = 1_000_000;
-const matrixCopy = m => m.map(row => [...row]);
+const matrixCopy = m => m.map(row => row.map(x => (x === 0 ? 0 : x))); // also turns -0 into 0
 function matrix(value, name) {
-  if (!Array.isArray(value) || value.length < 1 || value.length > MAX_SIZE) {
+  if (value === undefined) throw new InputError(`${name} is required.`, name);
+  if (!Array.isArray(value)) throw new InputError(`${name} must be an array of rows, for example [[1, 2], [3, 4]].`, name);
+  if (value.length < 1 || value.length > MAX_SIZE) {
     throw new InputError(`${name} must have 1 to ${MAX_SIZE} rows.`, name);
   }
-  const width = Array.isArray(value[0]) ? value[0].length : 0;
+  if (!Array.isArray(value[0])) throw new InputError(`${name} must be an array of rows; row 1 is not an array.`, name);
+  const width = value[0].length;
   if (width < 1 || width > MAX_SIZE) throw new InputError(`${name} must have 1 to ${MAX_SIZE} columns.`, name);
   value.forEach((row, i) => {
-    if (!Array.isArray(row) || row.length !== width) throw new InputError(`${name} must be rectangular; row ${i + 1} has the wrong length.`, name);
+    if (!Array.isArray(row)) throw new InputError(`${name} must be an array of rows; row ${i + 1} is not an array.`, name);
+    if (row.length !== width) throw new InputError(`${name} must be rectangular; row ${i + 1} has the wrong length.`, name);
     row.forEach((x, j) => {
       if (typeof x !== 'number' || !Number.isFinite(x) || Math.abs(x) > MAX_VALUE) {
         throw new InputError(`${name}[${i}][${j}] must be a finite number with absolute value at most ${MAX_VALUE}.`, name);
@@ -18,6 +22,15 @@ function matrix(value, name) {
     });
   });
   return matrixCopy(value);
+}
+// Every computed value passes through here. It cleans binary floating-point noise
+// (0.1 + 0.2 -> 0.3), turns -0 into 0, and refuses results that cannot be shown accurately.
+function checked(value) {
+  if (!Number.isFinite(value) || Math.abs(value) > Number.MAX_SAFE_INTEGER) {
+    throw new InputError('The calculation produces numbers too large to show exactly. Use smaller entries.', 'A', { code: 'RESULT_TOO_LARGE', status: 422 });
+  }
+  const clean = Number.isInteger(value) ? value : Number(value.toPrecision(15));
+  return clean === 0 ? 0 : clean;
 }
 const dims = m => `${m.length} x ${m[0].length}`;
 const point = (matrix, row, column) => ({ matrix, row, column });
@@ -78,12 +91,12 @@ export function calculateMatrix(operation, body) {
         formula, ['Matrix multiplication uses a row from A and a column from B, not entry-by-entry multiplication.'],
         { row, column, runningSum: 0, result: C }, [point('C', i, j)]);
       for (let k = 0; k < c; k++) {
-        const product = A[i][k] * B[k][j]; terms.push(product);
+        const product = checked(A[i][k] * B[k][j]); terms.push(product);
         t.add('calculate', 'multiply-pair', `Multiply pair ${k + 1}`,
           `Multiply ${A[i][k]} from A by ${B[k][j]} from B: ${A[i][k]} * ${B[k][j]} = ${product}.`,
           `product = A[${i}][${k}] * B[${k}][${j}]`, ['Only matching positions in the selected row and column are paired.'],
           { product, terms, runningSum: sum, result: C }, [point('A', i, k), point('B', k, j)]);
-        const previous = sum; sum += product;
+        const previous = sum; sum = checked(sum + product);
         t.add('calculate', 'add-product', `Add product ${k + 1} to the running sum`,
           `The previous sum is ${previous}. Add the product ${product}: ${previous} + ${product} = ${sum}.`,
           'newSum = previousSum + product', ['Include every product before storing this result cell.'],
@@ -105,7 +118,7 @@ export function calculateMatrix(operation, body) {
       t.add('calculate', 'select-pair', `Select row ${i + 1}, column ${j + 1}`,
         `Read ${A[i][j]} from A and ${B[i][j]} from B at the same position.`, formula,
         ['Use corresponding entries, not a row-column dot product.'], { left: A[i][j], right: B[i][j], result: C }, [point('A', i, j), point('B', i, j)]);
-      const value = operation === 'add' ? A[i][j] + B[i][j] : A[i][j] - B[i][j];
+      const value = checked(operation === 'add' ? A[i][j] + B[i][j] : A[i][j] - B[i][j]);
       t.add('calculate', 'evaluate-pair', `${operation === 'add' ? 'Add' : 'Subtract'} the selected entries`,
         `${A[i][j]} ${symbol} ${B[i][j]} = ${value}.`, formula,
         [operation === 'subtract' ? 'Order matters: subtract B from A.' : 'Add the two values at this position.'], { value, result: C });
@@ -141,15 +154,15 @@ function determinant(M, t, label, depth) {
       `Remove row 1 and column ${j + 1} from ${label}. The remaining entries form the ${n - 1} x ${n - 1} minor shown in state.minor.`,
       'minor = matrix with the selected row and column removed', ['Preserve the relative order of the remaining entries.'], { minor, label, minorLabel, depth });
     const minorDet = determinant(minor, t, minorLabel, depth + 1);
-    const signedEntry = sign * M[0][j];
+    const signedEntry = checked(sign * M[0][j]);
     t.add('calculate', 'apply-sign', `Apply the sign for column ${j + 1}`,
       `${sign} * ${M[0][j]} = ${signedEntry}.`, 'signedEntry = sign * firstRowEntry',
       ['Apply the sign before multiplying by the minor determinant.'], { signedEntry, minorDeterminant: minorDet, label, depth });
-    const term = signedEntry * minorDet;
+    const term = checked(signedEntry * minorDet);
     t.add('calculate', 'cofactor-product', `Calculate term ${j + 1} of ${label}`,
       `The minor determinant is ${minorDet}. Multiply it by the signed entry: ${signedEntry} * ${minorDet} = ${term}.`,
       'term = signedEntry * minorDeterminant', ['This term contributes to the determinant of the parent matrix.'], { term, minorDeterminant: minorDet, label, depth });
-    const previous = total; total += term;
+    const previous = total; total = checked(total + term);
     t.add('calculate', 'accumulate-term', `Add term ${j + 1} of ${label}`,
       `Start from ${previous} and add ${term}: ${previous} + ${term} = ${total}.`, 'newTotal = previousTotal + term',
       ['Calculate all first-row terms, including terms whose entry is zero.'], { previousTotal: previous, term, runningTotal: total, label, depth });
@@ -157,4 +170,4 @@ function determinant(M, t, label, depth) {
   t.add('calculate', 'return-determinant', `Return det(${label})`, `All ${n} terms are included; det(${label}) = ${total}.`,
     rule, ['Return this value to the parent calculation, or use it as the final determinant.'], { determinant: total, label, depth });
   return total;
-}
+                                 }
