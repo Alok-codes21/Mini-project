@@ -1,0 +1,907 @@
+{
+  "success": true,
+  "schemaVersion": "1.0",
+  "module": "number-system",
+  "operation": "convert",
+  "level": "beginner",
+  "input": {
+    "number": "13",
+    "fromBase": 10,
+    "toBase": 2
+  },
+  "result": "1101",
+  "steps": [
+    {
+      "id": 1,
+      "stage": "understand",
+      "action": "validate-digits",
+      "title": "Check the input and bases",
+      "explanation": "13 is valid in base 10. Each digit must be between 0 and 9. We will convert its magnitude first, then restore a negative sign if needed.",
+      "formula": "0 <= digitValue < sourceBase",
+      "keyPoints": [
+        "This endpoint converts signed integers, not fractions or two's-complement bit patterns.",
+        "Exact integer arithmetic is used, even beyond JavaScript's safe-number range."
+      ],
+      "state": {
+        "original": "13",
+        "digits": "13",
+        "negative": false,
+        "fromBase": 10,
+        "toBase": 2
+      },
+      "highlights": []
+    },
+    {
+      "id": 2,
+      "stage": "decode",
+      "action": "start-positional-expansion",
+      "title": "Read the input by place value",
+      "explanation": "Start the total at 0. The rightmost digit has position 0. Moving one place left increases the position by 1. For base 10, each place is 10 times the place to its right.",
+      "formula": "decimalValue = sum(digitValue * base^position), positions counted from the right starting at 0",
+      "keyPoints": [
+        "A digit symbol and its numeric value can differ: A=10, B=11, C=12, D=13, E=14, F=15."
+      ],
+      "state": {
+        "digits": "13",
+        "base": 10,
+        "runningTotal": "0"
+      },
+      "highlights": []
+    },
+    {
+      "id": 3,
+      "stage": "decode",
+      "action": "read-digit",
+      "title": "Read digit 1 of the input",
+      "explanation": "The symbol 1 has value 1. It is at position 1, counting from the right starting at 0.",
+      "formula": "position = number of digits to the right",
+      "keyPoints": [
+        "The leftmost digit is processed first here; place positions still count from the right."
+      ],
+      "state": {
+        "index": 0,
+        "symbol": "1",
+        "digitValue": 1,
+        "position": 1,
+        "runningTotal": "0"
+      },
+      "highlights": [
+        {
+          "digitIndex": 0
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "stage": "decode",
+      "action": "calculate-place-value",
+      "title": "Calculate place value for position 1",
+      "explanation": "10^1 means multiplying 1 factors of 10: 10 = 10.",
+      "formula": "placeValue = base^position",
+      "keyPoints": [
+        "A power describes a place value, not the digit itself."
+      ],
+      "state": {
+        "position": 1,
+        "placeValue": "10"
+      },
+      "highlights": []
+    },
+    {
+      "id": 5,
+      "stage": "decode",
+      "action": "calculate-contribution",
+      "title": "Calculate the contribution of 1",
+      "explanation": "1 * 10 = 10. This is how much the selected digit contributes to the decimal total.",
+      "formula": "contribution = digitValue * placeValue",
+      "keyPoints": [
+        "A zero digit contributes 0 but still occupies a place."
+      ],
+      "state": {
+        "contribution": "10",
+        "digitValue": 1,
+        "placeValue": "10"
+      },
+      "highlights": []
+    },
+    {
+      "id": 6,
+      "stage": "decode",
+      "action": "add-contribution",
+      "title": "Add digit 1 to the total",
+      "explanation": "0 + 10 = 10.",
+      "formula": "newTotal = previousTotal + contribution",
+      "keyPoints": [
+        "Include every digit, even a zero."
+      ],
+      "state": {
+        "previousTotal": "0",
+        "contribution": "10",
+        "runningTotal": "10"
+      },
+      "highlights": []
+    },
+    {
+      "id": 7,
+      "stage": "decode",
+      "action": "read-digit",
+      "title": "Read digit 2 of the input",
+      "explanation": "The symbol 3 has value 3. It is at position 0, counting from the right starting at 0.",
+      "formula": "position = number of digits to the right",
+      "keyPoints": [
+        "The leftmost digit is processed first here; place positions still count from the right."
+      ],
+      "state": {
+        "index": 1,
+        "symbol": "3",
+        "digitValue": 3,
+        "position": 0,
+        "runningTotal": "10"
+      },
+      "highlights": [
+        {
+          "digitIndex": 1
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "stage": "decode",
+      "action": "calculate-place-value",
+      "title": "Calculate place value for position 0",
+      "explanation": "10^0 = 1. Every base to the power 0 is 1.",
+      "formula": "placeValue = base^position",
+      "keyPoints": [
+        "A power describes a place value, not the digit itself."
+      ],
+      "state": {
+        "position": 0,
+        "placeValue": "1"
+      },
+      "highlights": []
+    },
+    {
+      "id": 9,
+      "stage": "decode",
+      "action": "calculate-contribution",
+      "title": "Calculate the contribution of 3",
+      "explanation": "3 * 1 = 3. This is how much the selected digit contributes to the decimal total.",
+      "formula": "contribution = digitValue * placeValue",
+      "keyPoints": [
+        "A zero digit contributes 0 but still occupies a place."
+      ],
+      "state": {
+        "contribution": "3",
+        "digitValue": 3,
+        "placeValue": "1"
+      },
+      "highlights": []
+    },
+    {
+      "id": 10,
+      "stage": "decode",
+      "action": "add-contribution",
+      "title": "Add digit 2 to the total",
+      "explanation": "10 + 3 = 13.",
+      "formula": "newTotal = previousTotal + contribution",
+      "keyPoints": [
+        "Include every digit, even a zero."
+      ],
+      "state": {
+        "previousTotal": "10",
+        "contribution": "3",
+        "runningTotal": "13"
+      },
+      "highlights": []
+    },
+    {
+      "id": 11,
+      "stage": "decode",
+      "action": "finish-positional-expansion",
+      "title": "Finish reading the input",
+      "explanation": "Every digit has been included. The decimal magnitude is 13.",
+      "formula": "decimalValue = sum(digitValue * base^position), positions counted from the right starting at 0",
+      "keyPoints": [
+        "Magnitude means the value without its sign."
+      ],
+      "state": {
+        "decimalMagnitude": "13"
+      },
+      "highlights": []
+    },
+    {
+      "id": 12,
+      "stage": "encode",
+      "action": "start-division",
+      "title": "Prepare repeated division",
+      "explanation": "Start with 13. Repeatedly divide by 2. Record the quotient and remainder each time; continue with the quotient until it is 0.",
+      "formula": "value = quotient * targetBase + remainder; 0 <= remainder < targetBase",
+      "keyPoints": [
+        "The first remainder is the rightmost output digit because it represents the smallest place."
+      ],
+      "state": {
+        "currentValue": "13",
+        "remainders": []
+      },
+      "highlights": []
+    },
+    {
+      "id": 13,
+      "stage": "encode",
+      "action": "divide",
+      "title": "Divide 13 by 2",
+      "explanation": "13 divided by 2 has whole-number quotient 6. Keep this quotient for the next division.",
+      "formula": "quotient = floor(currentValue / targetBase)",
+      "keyPoints": [
+        "Use a whole-number quotient, not a decimal fraction."
+      ],
+      "state": {
+        "currentValue": "13",
+        "quotient": "6",
+        "targetBase": 2
+      },
+      "highlights": []
+    },
+    {
+      "id": 14,
+      "stage": "encode",
+      "action": "quotient-product",
+      "title": "Find the amount covered by the quotient",
+      "explanation": "6 * 2 = 12. Subtract this covered amount from the current value to find what is left over.",
+      "formula": "coveredAmount = quotient * targetBase",
+      "keyPoints": [
+        "The remainder is the part not covered by whole groups of the target base."
+      ],
+      "state": {
+        "coveredAmount": "12"
+      },
+      "highlights": []
+    },
+    {
+      "id": 15,
+      "stage": "encode",
+      "action": "record-remainder",
+      "title": "Record remainder 1",
+      "explanation": "13 - 12 = 1. The remainder 1 is written as 1 in base 2.",
+      "formula": "remainder = currentValue - quotient * targetBase",
+      "keyPoints": [
+        "A remainder is always smaller than the target base.",
+        "These digits are recorded from the smallest place to the largest place."
+      ],
+      "state": {
+        "remainder": "1",
+        "digit": "1",
+        "remainders": [
+          "1"
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 16,
+      "stage": "encode",
+      "action": "continue-with-quotient",
+      "title": "Continue with the quotient",
+      "explanation": "Use 6, the quotient, as the current value for the next division. Do not divide the remainder.",
+      "formula": "nextCurrentValue = quotient",
+      "keyPoints": [
+        "Stop only when the quotient reaches 0."
+      ],
+      "state": {
+        "currentValue": "6",
+        "remainders": [
+          "1"
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 17,
+      "stage": "encode",
+      "action": "divide",
+      "title": "Divide 6 by 2",
+      "explanation": "6 divided by 2 has whole-number quotient 3. Keep this quotient for the next division.",
+      "formula": "quotient = floor(currentValue / targetBase)",
+      "keyPoints": [
+        "Use a whole-number quotient, not a decimal fraction."
+      ],
+      "state": {
+        "currentValue": "6",
+        "quotient": "3",
+        "targetBase": 2
+      },
+      "highlights": []
+    },
+    {
+      "id": 18,
+      "stage": "encode",
+      "action": "quotient-product",
+      "title": "Find the amount covered by the quotient",
+      "explanation": "3 * 2 = 6. Subtract this covered amount from the current value to find what is left over.",
+      "formula": "coveredAmount = quotient * targetBase",
+      "keyPoints": [
+        "The remainder is the part not covered by whole groups of the target base."
+      ],
+      "state": {
+        "coveredAmount": "6"
+      },
+      "highlights": []
+    },
+    {
+      "id": 19,
+      "stage": "encode",
+      "action": "record-remainder",
+      "title": "Record remainder 2",
+      "explanation": "6 - 6 = 0. The remainder 0 is written as 0 in base 2.",
+      "formula": "remainder = currentValue - quotient * targetBase",
+      "keyPoints": [
+        "A remainder is always smaller than the target base.",
+        "These digits are recorded from the smallest place to the largest place."
+      ],
+      "state": {
+        "remainder": "0",
+        "digit": "0",
+        "remainders": [
+          "1",
+          "0"
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 20,
+      "stage": "encode",
+      "action": "continue-with-quotient",
+      "title": "Continue with the quotient",
+      "explanation": "Use 3, the quotient, as the current value for the next division. Do not divide the remainder.",
+      "formula": "nextCurrentValue = quotient",
+      "keyPoints": [
+        "Stop only when the quotient reaches 0."
+      ],
+      "state": {
+        "currentValue": "3",
+        "remainders": [
+          "1",
+          "0"
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 21,
+      "stage": "encode",
+      "action": "divide",
+      "title": "Divide 3 by 2",
+      "explanation": "3 divided by 2 has whole-number quotient 1. Keep this quotient for the next division.",
+      "formula": "quotient = floor(currentValue / targetBase)",
+      "keyPoints": [
+        "Use a whole-number quotient, not a decimal fraction."
+      ],
+      "state": {
+        "currentValue": "3",
+        "quotient": "1",
+        "targetBase": 2
+      },
+      "highlights": []
+    },
+    {
+      "id": 22,
+      "stage": "encode",
+      "action": "quotient-product",
+      "title": "Find the amount covered by the quotient",
+      "explanation": "1 * 2 = 2. Subtract this covered amount from the current value to find what is left over.",
+      "formula": "coveredAmount = quotient * targetBase",
+      "keyPoints": [
+        "The remainder is the part not covered by whole groups of the target base."
+      ],
+      "state": {
+        "coveredAmount": "2"
+      },
+      "highlights": []
+    },
+    {
+      "id": 23,
+      "stage": "encode",
+      "action": "record-remainder",
+      "title": "Record remainder 3",
+      "explanation": "3 - 2 = 1. The remainder 1 is written as 1 in base 2.",
+      "formula": "remainder = currentValue - quotient * targetBase",
+      "keyPoints": [
+        "A remainder is always smaller than the target base.",
+        "These digits are recorded from the smallest place to the largest place."
+      ],
+      "state": {
+        "remainder": "1",
+        "digit": "1",
+        "remainders": [
+          "1",
+          "0",
+          "1"
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 24,
+      "stage": "encode",
+      "action": "continue-with-quotient",
+      "title": "Continue with the quotient",
+      "explanation": "Use 1, the quotient, as the current value for the next division. Do not divide the remainder.",
+      "formula": "nextCurrentValue = quotient",
+      "keyPoints": [
+        "Stop only when the quotient reaches 0."
+      ],
+      "state": {
+        "currentValue": "1",
+        "remainders": [
+          "1",
+          "0",
+          "1"
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 25,
+      "stage": "encode",
+      "action": "divide",
+      "title": "Divide 1 by 2",
+      "explanation": "1 divided by 2 has whole-number quotient 0. Keep this quotient for the next division.",
+      "formula": "quotient = floor(currentValue / targetBase)",
+      "keyPoints": [
+        "Use a whole-number quotient, not a decimal fraction."
+      ],
+      "state": {
+        "currentValue": "1",
+        "quotient": "0",
+        "targetBase": 2
+      },
+      "highlights": []
+    },
+    {
+      "id": 26,
+      "stage": "encode",
+      "action": "quotient-product",
+      "title": "Find the amount covered by the quotient",
+      "explanation": "0 * 2 = 0. Subtract this covered amount from the current value to find what is left over.",
+      "formula": "coveredAmount = quotient * targetBase",
+      "keyPoints": [
+        "The remainder is the part not covered by whole groups of the target base."
+      ],
+      "state": {
+        "coveredAmount": "0"
+      },
+      "highlights": []
+    },
+    {
+      "id": 27,
+      "stage": "encode",
+      "action": "record-remainder",
+      "title": "Record remainder 4",
+      "explanation": "1 - 0 = 1. The remainder 1 is written as 1 in base 2.",
+      "formula": "remainder = currentValue - quotient * targetBase",
+      "keyPoints": [
+        "A remainder is always smaller than the target base.",
+        "These digits are recorded from the smallest place to the largest place."
+      ],
+      "state": {
+        "remainder": "1",
+        "digit": "1",
+        "remainders": [
+          "1",
+          "0",
+          "1",
+          "1"
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 28,
+      "stage": "encode",
+      "action": "continue-with-quotient",
+      "title": "Stop dividing",
+      "explanation": "The quotient is 0. There are no higher places left to calculate, so stop.",
+      "formula": "nextCurrentValue = quotient",
+      "keyPoints": [
+        "Stop only when the quotient reaches 0."
+      ],
+      "state": {
+        "currentValue": "0",
+        "remainders": [
+          "1",
+          "0",
+          "1",
+          "1"
+        ]
+      },
+      "highlights": []
+    },
+    {
+      "id": 29,
+      "stage": "encode",
+      "action": "reverse-remainders",
+      "title": "Read the remainders from bottom to top",
+      "explanation": "Recorded from first to last, the remainders are 1, 0, 1, 1. The first belongs on the right, and the last belongs on the left. Read them in reverse order: 1101.",
+      "formula": "outputDigits = reverse(recordedRemainders)",
+      "keyPoints": [
+        "First remainder = smallest place (rightmost digit).",
+        "Last remainder = largest place (leftmost digit)."
+      ],
+      "state": {
+        "remainders": [
+          "1",
+          "0",
+          "1",
+          "1"
+        ],
+        "outputDigits": "1101"
+      },
+      "highlights": []
+    },
+    {
+      "id": 30,
+      "stage": "encode",
+      "action": "restore-sign",
+      "title": "Write the signed result",
+      "explanation": "Use 1101 without a minus sign.",
+      "formula": "signedResult = sign + magnitudeDigits",
+      "keyPoints": [
+        "This is signed mathematical notation, not a fixed-width machine encoding."
+      ],
+      "state": {
+        "result": "1101"
+      },
+      "highlights": []
+    },
+    {
+      "id": 31,
+      "stage": "verify",
+      "action": "start-positional-expansion",
+      "title": "Read the result by place value",
+      "explanation": "Start the total at 0. The rightmost digit has position 0. Moving one place left increases the position by 1. For base 2, each place is 2 times the place to its right.",
+      "formula": "decimalValue = sum(digitValue * base^position), positions counted from the right starting at 0",
+      "keyPoints": [
+        "A digit symbol and its numeric value can differ: A=10, B=11, C=12, D=13, E=14, F=15."
+      ],
+      "state": {
+        "digits": "1101",
+        "base": 2,
+        "runningTotal": "0"
+      },
+      "highlights": []
+    },
+    {
+      "id": 32,
+      "stage": "verify",
+      "action": "read-digit",
+      "title": "Read digit 1 of the result",
+      "explanation": "The symbol 1 has value 1. It is at position 3, counting from the right starting at 0.",
+      "formula": "position = number of digits to the right",
+      "keyPoints": [
+        "The leftmost digit is processed first here; place positions still count from the right."
+      ],
+      "state": {
+        "index": 0,
+        "symbol": "1",
+        "digitValue": 1,
+        "position": 3,
+        "runningTotal": "0"
+      },
+      "highlights": [
+        {
+          "digitIndex": 0
+        }
+      ]
+    },
+    {
+      "id": 33,
+      "stage": "verify",
+      "action": "calculate-place-value",
+      "title": "Calculate place value for position 3",
+      "explanation": "2^3 means multiplying 3 factors of 2: 2 * 2 * 2 = 8.",
+      "formula": "placeValue = base^position",
+      "keyPoints": [
+        "A power describes a place value, not the digit itself."
+      ],
+      "state": {
+        "position": 3,
+        "placeValue": "8"
+      },
+      "highlights": []
+    },
+    {
+      "id": 34,
+      "stage": "verify",
+      "action": "calculate-contribution",
+      "title": "Calculate the contribution of 1",
+      "explanation": "1 * 8 = 8. This is how much the selected digit contributes to the decimal total.",
+      "formula": "contribution = digitValue * placeValue",
+      "keyPoints": [
+        "A zero digit contributes 0 but still occupies a place."
+      ],
+      "state": {
+        "contribution": "8",
+        "digitValue": 1,
+        "placeValue": "8"
+      },
+      "highlights": []
+    },
+    {
+      "id": 35,
+      "stage": "verify",
+      "action": "add-contribution",
+      "title": "Add digit 1 to the total",
+      "explanation": "0 + 8 = 8.",
+      "formula": "newTotal = previousTotal + contribution",
+      "keyPoints": [
+        "Include every digit, even a zero."
+      ],
+      "state": {
+        "previousTotal": "0",
+        "contribution": "8",
+        "runningTotal": "8"
+      },
+      "highlights": []
+    },
+    {
+      "id": 36,
+      "stage": "verify",
+      "action": "read-digit",
+      "title": "Read digit 2 of the result",
+      "explanation": "The symbol 1 has value 1. It is at position 2, counting from the right starting at 0.",
+      "formula": "position = number of digits to the right",
+      "keyPoints": [
+        "The leftmost digit is processed first here; place positions still count from the right."
+      ],
+      "state": {
+        "index": 1,
+        "symbol": "1",
+        "digitValue": 1,
+        "position": 2,
+        "runningTotal": "8"
+      },
+      "highlights": [
+        {
+          "digitIndex": 1
+        }
+      ]
+    },
+    {
+      "id": 37,
+      "stage": "verify",
+      "action": "calculate-place-value",
+      "title": "Calculate place value for position 2",
+      "explanation": "2^2 means multiplying 2 factors of 2: 2 * 2 = 4.",
+      "formula": "placeValue = base^position",
+      "keyPoints": [
+        "A power describes a place value, not the digit itself."
+      ],
+      "state": {
+        "position": 2,
+        "placeValue": "4"
+      },
+      "highlights": []
+    },
+    {
+      "id": 38,
+      "stage": "verify",
+      "action": "calculate-contribution",
+      "title": "Calculate the contribution of 1",
+      "explanation": "1 * 4 = 4. This is how much the selected digit contributes to the decimal total.",
+      "formula": "contribution = digitValue * placeValue",
+      "keyPoints": [
+        "A zero digit contributes 0 but still occupies a place."
+      ],
+      "state": {
+        "contribution": "4",
+        "digitValue": 1,
+        "placeValue": "4"
+      },
+      "highlights": []
+    },
+    {
+      "id": 39,
+      "stage": "verify",
+      "action": "add-contribution",
+      "title": "Add digit 2 to the total",
+      "explanation": "8 + 4 = 12.",
+      "formula": "newTotal = previousTotal + contribution",
+      "keyPoints": [
+        "Include every digit, even a zero."
+      ],
+      "state": {
+        "previousTotal": "8",
+        "contribution": "4",
+        "runningTotal": "12"
+      },
+      "highlights": []
+    },
+    {
+      "id": 40,
+      "stage": "verify",
+      "action": "read-digit",
+      "title": "Read digit 3 of the result",
+      "explanation": "The symbol 0 has value 0. It is at position 1, counting from the right starting at 0.",
+      "formula": "position = number of digits to the right",
+      "keyPoints": [
+        "The leftmost digit is processed first here; place positions still count from the right."
+      ],
+      "state": {
+        "index": 2,
+        "symbol": "0",
+        "digitValue": 0,
+        "position": 1,
+        "runningTotal": "12"
+      },
+      "highlights": [
+        {
+          "digitIndex": 2
+        }
+      ]
+    },
+    {
+      "id": 41,
+      "stage": "verify",
+      "action": "calculate-place-value",
+      "title": "Calculate place value for position 1",
+      "explanation": "2^1 means multiplying 1 factors of 2: 2 = 2.",
+      "formula": "placeValue = base^position",
+      "keyPoints": [
+        "A power describes a place value, not the digit itself."
+      ],
+      "state": {
+        "position": 1,
+        "placeValue": "2"
+      },
+      "highlights": []
+    },
+    {
+      "id": 42,
+      "stage": "verify",
+      "action": "calculate-contribution",
+      "title": "Calculate the contribution of 0",
+      "explanation": "0 * 2 = 0. This is how much the selected digit contributes to the decimal total.",
+      "formula": "contribution = digitValue * placeValue",
+      "keyPoints": [
+        "A zero digit contributes 0 but still occupies a place."
+      ],
+      "state": {
+        "contribution": "0",
+        "digitValue": 0,
+        "placeValue": "2"
+      },
+      "highlights": []
+    },
+    {
+      "id": 43,
+      "stage": "verify",
+      "action": "add-contribution",
+      "title": "Add digit 3 to the total",
+      "explanation": "12 + 0 = 12.",
+      "formula": "newTotal = previousTotal + contribution",
+      "keyPoints": [
+        "Include every digit, even a zero."
+      ],
+      "state": {
+        "previousTotal": "12",
+        "contribution": "0",
+        "runningTotal": "12"
+      },
+      "highlights": []
+    },
+    {
+      "id": 44,
+      "stage": "verify",
+      "action": "read-digit",
+      "title": "Read digit 4 of the result",
+      "explanation": "The symbol 1 has value 1. It is at position 0, counting from the right starting at 0.",
+      "formula": "position = number of digits to the right",
+      "keyPoints": [
+        "The leftmost digit is processed first here; place positions still count from the right."
+      ],
+      "state": {
+        "index": 3,
+        "symbol": "1",
+        "digitValue": 1,
+        "position": 0,
+        "runningTotal": "12"
+      },
+      "highlights": [
+        {
+          "digitIndex": 3
+        }
+      ]
+    },
+    {
+      "id": 45,
+      "stage": "verify",
+      "action": "calculate-place-value",
+      "title": "Calculate place value for position 0",
+      "explanation": "2^0 = 1. Every base to the power 0 is 1.",
+      "formula": "placeValue = base^position",
+      "keyPoints": [
+        "A power describes a place value, not the digit itself."
+      ],
+      "state": {
+        "position": 0,
+        "placeValue": "1"
+      },
+      "highlights": []
+    },
+    {
+      "id": 46,
+      "stage": "verify",
+      "action": "calculate-contribution",
+      "title": "Calculate the contribution of 1",
+      "explanation": "1 * 1 = 1. This is how much the selected digit contributes to the decimal total.",
+      "formula": "contribution = digitValue * placeValue",
+      "keyPoints": [
+        "A zero digit contributes 0 but still occupies a place."
+      ],
+      "state": {
+        "contribution": "1",
+        "digitValue": 1,
+        "placeValue": "1"
+      },
+      "highlights": []
+    },
+    {
+      "id": 47,
+      "stage": "verify",
+      "action": "add-contribution",
+      "title": "Add digit 4 to the total",
+      "explanation": "12 + 1 = 13.",
+      "formula": "newTotal = previousTotal + contribution",
+      "keyPoints": [
+        "Include every digit, even a zero."
+      ],
+      "state": {
+        "previousTotal": "12",
+        "contribution": "1",
+        "runningTotal": "13"
+      },
+      "highlights": []
+    },
+    {
+      "id": 48,
+      "stage": "verify",
+      "action": "finish-positional-expansion",
+      "title": "Finish reading the result",
+      "explanation": "Every digit has been included. The decimal magnitude is 13.",
+      "formula": "decimalValue = sum(digitValue * base^position), positions counted from the right starting at 0",
+      "keyPoints": [
+        "Magnitude means the value without its sign."
+      ],
+      "state": {
+        "decimalMagnitude": "13"
+      },
+      "highlights": []
+    },
+    {
+      "id": 49,
+      "stage": "verify",
+      "action": "compare-values",
+      "title": "Verify that the value is unchanged",
+      "explanation": "Reading the result in base 2 gives magnitude 13, which matches the original magnitude 13. With the original sign, both represent 13 in decimal.",
+      "formula": "decodedOutputMagnitude = decodedInputMagnitude",
+      "keyPoints": [
+        "Changing the base changes the written digits, not the number's value."
+      ],
+      "state": {
+        "passed": true,
+        "originalDecimal": "13",
+        "verifiedDecimal": "13"
+      },
+      "highlights": []
+    }
+  ],
+  "summary": {
+    "totalSteps": 49,
+    "keyPoints": [
+      "Decode the source digits by place value.",
+      "Encode the magnitude in the target base.",
+      "Verify the output by converting it back by place value."
+    ]
+  }
+}
