@@ -1,5 +1,7 @@
 import "./enhance.css";
 import "./ui22.css";
+import "./mobile.css";
+import { mobileNav } from "./lib/ui26.js";
 import { initUI22 } from "./lib/ui22.js";
 import { scrollUI, ripples, magnetic, pageExit } from "./lib/extras.js";
 import { mountAIPanel } from "./lib/ai-panel.js";
@@ -19,6 +21,7 @@ revealOnScroll(".feature-card, .module-card, .matrix-card, .set-card, .relation-
 interactiveButtons();
 mountAIPanel();
 initUI22();
+mobileNav();
 scrollUI(); ripples(); pageExit(); magnetic(".primary-btn, .nav-actions .btn");
 
 const pages = {
