@@ -80,6 +80,7 @@ export function textRoll(el, trigger = el) {
     chars.forEach((c) => (c.style.transform = "")); busy = false;
   };
   ["pointerenter", "focusin", "pointerdown"].forEach((ev) => trigger.addEventListener(ev, run));
+  return run;
 }
 
 // ---- infinite slider of tool cards (auto-scroll, slows on hover, edge fade) ----
