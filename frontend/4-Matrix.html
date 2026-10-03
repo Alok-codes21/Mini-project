@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matrix Visualizer | MathVision AI</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="Matrix.css">
+</head>
+
+<body data-page="matrix">
+
+    <header>
+        <nav class="navbar">
+            <div class="logo">MathVision</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="set.html">Sets</a></li>
+                <li><a href="Matrix.html">Matrices</a></li>
+                <li><a href="relation.html">Relations</a></li>
+                <li><a href="converter.html">Converter</a></li>
+                <li><a href="practice.html">Practice</a></li>
+                <li><a href="history.html">History</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false">
+                    <span class="theme-icon"><i class="fa-solid fa-moon"></i></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Page Title -->
+    <section class="page-title">
+        <h1>Matrix Visualizer</h1>
+        <p>
+            Perform various matrix operations with
+            interactive step-by-step explanations.
+        </p>
+    </section>
+
+    <!-- Operations -->
+    <section class="operations">
+        <h2>Select Operation</h2>
+        <div class="button-group">
+            <button id="addBtn">Addition</button>
+            <button id="subBtn">Subtraction</button>
+            <button id="multBtn">Multiplication</button>
+            <button id="transposeBtn">Transpose</button>
+            <button id="determinantBtn">Determinant</button>
+            <button id="inverseBtn">Inverse</button>
+        </div>
+    </section>
+
+    <!-- Matrix Input -->
+    <section class="size-controls">
+        <label for="matrixSize">Enter matrix size</label>
+        <div class="size-input-row">
+            <input type="number" id="matrixSize" min="1" max="6" value="2">
+            <button type="button" id="generateBtn">Generate Matrices</button>
+        </div>
+        <p class="size-hint">The size you enter creates a square matrix for both Matrix A and Matrix B.</p>
+    </section>
+    <section class="matrix-section">
+        <div class="matrix-card">
+            <h2>Matrix A</h2>
+            <div id="matrixA" class="matrix-grid-container"></div>
+        </div>
+
+        <div class="matrix-card">
+            <h2>Matrix B</h2>
+            <div id="matrixB" class="matrix-grid-container"></div>
+        </div>
+    </section>
+
+    <!-- Result -->
+    <section class="result">
+        <h2>Result</h2>
+        <div class="result-box">
+            Your result will appear here.
+        </div>
+    </section>
+    <!-- Explanation -->
+    <section class="explanation">
+        <h2>Step-by-Step Solution</h2>
+        <div class="explanation-box">
+            Step-by-step calculations will be displayed here.
+        </div>
+    </section>
+    <footer>
+        <p>© 2026 MathVision | Interactive Mathematics Learning Platform</p>
+    </footer>
+    <script src="script.js"></script>
+    <script src="matrix.js"></script>
+
+    <script type="module" src="/src/main.jsx"></script>
+</body>
+
+</html>
