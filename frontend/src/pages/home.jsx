@@ -3,7 +3,7 @@ import AIHeroCard from "../react/AIHeroCard.jsx";
 import { mountAsciiField } from "../lib/ascii-field.js";
 import { floatingSymbols, statsStrip } from "../lib/extras.js";
 import { A, animate, stagger } from "../lib/fx.js";
-import { scrambleOnView, textRoll, infiniteSlider, navRipple } from "../lib/ui25.js";
+import { scramble, textRoll, infiniteSlider, navRipple } from "../lib/ui25.js";
 
 export default function init() {
   // React hero card replaces the placeholder image
@@ -64,7 +64,11 @@ export default function init() {
   }
 
   // round 5: scramble, roll, slider
-  scrambleOnView([document.querySelector(".hero-text p"), ...document.querySelectorAll(".feature-card p, .feature-subtitle, .module-subtitle")].filter(Boolean));
+  // scramble only the blue words of the hero heading, after the blur reveal, and again on hover
+  const blue = [...document.querySelectorAll(".hero h1 .in-span")];
+  blue.forEach((w) => { w.dataset.scr = w.textContent.trim(); });
+  setTimeout(() => blue.forEach((w, i) => setTimeout(() => scramble(w, { duration: 1000 }), i * 160)), 1500);
+  blue.forEach((w) => w.addEventListener("pointerenter", () => scramble(w, { duration: 700 })));
   document.querySelectorAll(".nav-links a").forEach((a) => { if (!a.children.length) textRoll(a); });
   document.querySelectorAll(".feature-card h3, .module-card h3").forEach((h) => textRoll(h, h.closest(".feature-card, .module-card")));
   infiniteSlider(document.querySelector(".modules"));
