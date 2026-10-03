@@ -74,11 +74,12 @@ export function textRoll(el, trigger = el) {
   const txt = el.textContent; el.setAttribute("aria-label", txt);
   el.innerHTML = [...txt].map((c) => c === " " ? `<span class="rl-sp"> </span>` : `<span class="rl" aria-hidden="true"><span class="rl-in"><i>${c}</i><i>${c}</i></span></span>`).join("");
   const chars = $$(".rl-in", el); let busy = false;
-  trigger.addEventListener("pointerenter", async () => {
+  const run = async () => {
     if (busy || reduce) return; busy = true;
-    await Promise.all(chars.map((c, i) => A(c, { y: ["0%", "-50%"] }, { duration: 0.42, delay: i * 0.028, ease: [0.22, 1, 0.36, 1] })));
+    await Promise.all(chars.map((c, i) => A(c, { y: ["0%", "-50%"] }, { duration: 0.6, delay: i * 0.05, ease: [0.22, 1, 0.36, 1] })));
     chars.forEach((c) => (c.style.transform = "")); busy = false;
-  });
+  };
+  ["pointerenter", "focusin", "pointerdown"].forEach((ev) => trigger.addEventListener(ev, run));
 }
 
 // ---- infinite slider of tool cards (auto-scroll, slows on hover, edge fade) ----
