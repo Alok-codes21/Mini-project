@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Number System Converter | MathVision AI</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <script type="module" crossorigin src="./assets/main-CxXvafI4.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/main-2A7DmtoE.css">
+  <link rel="stylesheet" crossorigin href="./assets/converter-D8bGBG_Z.css">
+</head>
+
+<body data-page="converter">
+    <header>
+        <nav class="navbar">
+            <div class="logo">MathVision</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="set.html">Sets</a></li>
+                <li><a href="Matrix.html">Matrices</a></li>
+                <li><a href="relation.html">Relations</a></li>
+                <li><a href="converter.html">Converter</a></li>
+                <li><a href="practice.html">Practice</a></li>
+                <li><a href="history.html">History</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" type="button" aria-label="Toggle dark mode" aria-pressed="false">
+                    <span class="theme-icon"><i class="fa-solid fa-moon"></i></span>
+                </button>
+            </div>
+
+        </nav>
+
+    </header>
+
+    <section class="page-title">
+        <h1>Number System Converter</h1>
+        <p>
+            Convert between Binary, Decimal, Octal and Hexadecimal with step-by-step explanations.
+        </p>
+    </section>
+
+    <section class="converter-section">
+        <div class="converter-card">
+            <h2>Enter Number</h2>
+            <input type="text" id="numberInput" placeholder="Enter a number">
+        </div>
+
+        <div class="converter-card-2">
+            <div class="Base">
+                <h2>Convert From</h2>
+                <select id="fromBase">
+                    <option>Decimal</option>
+                    <option>Binary</option>
+                    <option>Octal</option>
+                    <option>Hexadecimal</option>
+                </select>
+            </div>
+            <div class="Base">
+                <h2>Convert To</h2>
+                <select id="toBase">
+                    <option>Binary</option>
+                    <option>Decimal</option>
+                    <option>Octal</option>
+                    <option>Hexadecimal</option>
+                </select>
+            </div>
+        </div>
+
+    </section>
+    <section class="operations">
+        <h2>Conversion</h2>
+        <div class="button-group">
+            <button id="convertBtn">Convert</button>
+            <button id="clearBtn">Clear</button>
+        </div>
+    </section>
+    <section class="result">
+        <h2>Result</h2>
+        <div class="result-box">
+            Converted value will appear here.
+        </div>
+    </section>
+    <section class="explanation">
+        <h2>Conversion Steps</h2>
+        <div class="explanation-box">
+            Step-by-step conversion will appear here
+        </div>
+    </section>
+    <footer>
+        <p>© 2026 MathVision </p>
+    </footer>
+
+    <script src="script.js"></script>
+    
+
+</body>
+
+</html>
