@@ -64,12 +64,19 @@ export default function init() {
   }
 
   // round 5: scramble, roll, slider
-  // scramble only the blue words of the hero heading, after the blur reveal, and again on hover
-  const blue = [...document.querySelectorAll(".hero h1 .in-span")];
+  // scramble the whole hero heading, word by word, after the blur reveal, and again on hover
+  const blue = [...document.querySelectorAll(".hero h1 .fx-word")];
   blue.forEach((w) => { w.dataset.scr = w.textContent.trim(); });
-  setTimeout(() => blue.forEach((w, i) => setTimeout(() => scramble(w, { duration: 1000 }), i * 160)), 1500);
+  setTimeout(() => blue.forEach((w, i) => setTimeout(() => scramble(w, { duration: 1000 }), i * 110)), 1500);
   blue.forEach((w) => w.addEventListener("pointerenter", () => scramble(w, { duration: 700 })));
   document.querySelectorAll(".nav-links a").forEach((a) => { if (!a.children.length) textRoll(a); });
   document.querySelectorAll(".feature-card h3, .module-card h3").forEach((h) => textRoll(h, h.closest(".feature-card, .module-card")));
+  // section headings: roll when scrolled into view, and on hover
+  document.querySelectorAll("section h2").forEach((h) => {
+    if (!/Our Features|Explore Modules/.test(h.textContent)) return;
+    const run = textRoll(h); if (!run) return;
+    const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { setTimeout(run, 250); io.disconnect(); } }), { threshold: 0.6 });
+    io.observe(h);
+  });
   infiniteSlider(document.querySelector(".modules"));
 }
