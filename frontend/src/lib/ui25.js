@@ -53,13 +53,13 @@ export function tabChevrons(sel = ".operations .button-group") {
 const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-=×÷∑∫√π";
 export function scramble(el, { duration = 900 } = {}) {
   if (reduce || el._scr) return;
-  const txt = (el.dataset.scr ?? (el.dataset.scr = el.textContent.replace(/\s+/g, " ").trim())), n = txt.length; el._scr = true;
+  const txt = (el.dataset.scr ?? (el.dataset.scr = el.textContent.replace(/\s+/g, " ").trim())), n = txt.length; el._scr = true; el.style.minWidth = el.getBoundingClientRect().width + "px";
   el.setAttribute("aria-label", txt); const t0 = performance.now();
   const tick = (now) => {
     const p = Math.min(1, (now - t0) / duration); let out = "";
     for (let i = 0; i < n; i++) { const ch = txt[i]; out += ch === " " || ch === "\n" ? ch : p * 1.25 - (i / n) * 0.25 > 0.9 || i / n < (p - 0.1) * 1.12 ? ch : GLYPHS[(Math.random() * GLYPHS.length) | 0]; }
     el.textContent = out;
-    if (p < 1) requestAnimationFrame(tick); else { el.textContent = txt; el._scr = false; }
+    if (p < 1) requestAnimationFrame(tick); else { el.textContent = txt; el.style.minWidth = ""; el._scr = false; }
   };
   requestAnimationFrame(tick);
 }
@@ -72,7 +72,7 @@ export function scrambleOnView(els) {
 export function textRoll(el, trigger = el) {
   if (!el || el.dataset.roll) return; el.dataset.roll = "1";
   const txt = el.textContent; el.setAttribute("aria-label", txt);
-  el.innerHTML = [...txt].map((c) => c === " " ? `<span class="rl-sp"> </span>` : `<span class="rl" aria-hidden="true"><span class="rl-in"><i>${c}</i><i>${c}</i></span></span>`).join("");
+  el.innerHTML = txt.split(" ").map((w) => `<span class="rl-w">${[...w].map((c) => `<span class="rl" aria-hidden="true"><span class="rl-in"><i>${c}</i><i>${c}</i></span></span>`).join("")}</span>`).join(`<span class="rl-sp"> </span>`);
   const chars = $$(".rl-in", el); let busy = false;
   const run = async () => {
     if (busy || reduce) return; busy = true;
