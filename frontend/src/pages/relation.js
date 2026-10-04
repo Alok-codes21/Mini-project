@@ -1,3 +1,4 @@
+import { solveButton } from "../lib/solve-button.js";
 import { analyzeRelation, addHistory } from "../api.js";
 import { grid } from "../ui-helpers.js";
 import { exampleBar, setVal } from "../lib/extras.js";
@@ -26,7 +27,8 @@ function graphSvg(U, pairs) {
 export default function init() {
   const u = document.getElementById("universalSet"), r = document.getElementById("relationInput");
   const vis = document.querySelector(".visual-box"), resultBox = document.querySelector(".result-box"), stepsBox = document.querySelector(".explanation-box");
-  tabGroup(document.querySelector(".operations .button-group"));
+  const tabs = tabGroup(document.querySelector(".operations .button-group"));
+  let selected = ["graph", "Analyze"];
   exampleBar(".relation-input", [
     { label: "Equivalence", fill: () => { setVal(u, "1,2,3"); setVal(r, "(1,1),(2,2),(3,3),(1,2),(2,1)"); } },
     { label: "Partial order", fill: () => { setVal(u, "1,2,3"); setVal(r, "(1,1),(2,2),(3,3),(1,2),(1,3),(2,3)"); } },
@@ -52,7 +54,9 @@ export default function init() {
     mountPlayer(stepsBox, res.steps);
     addHistory({ module: "Relations", operation: label, result: x.type });
   };
-  document.getElementById("analyzeBtn").addEventListener("click", run("graph", "Analyze"));
-  document.getElementById("matrixBtn").addEventListener("click", run("matrix", "Relation Matrix"));
-  document.getElementById("graphBtn").addEventListener("click", run("graph", "Directed Graph"));
+  document.getElementById("analyzeBtn").addEventListener("click", () => { selected = ["graph", "Analyze"]; });
+  document.getElementById("matrixBtn").addEventListener("click", () => { selected = ["matrix", "Relation Matrix"]; });
+  document.getElementById("graphBtn").addEventListener("click", () => { selected = ["graph", "Directed Graph"]; });
+  tabs.select(document.getElementById("analyzeBtn"), true);
+  solveButton(".relation-input", () => run(...selected)());
 }
