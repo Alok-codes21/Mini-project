@@ -29,8 +29,8 @@ export default function init() {
     else drawScore("Not correct. Try once more.", "bad");
   };
   document.getElementById("submitBtn").addEventListener("click", submit);
-  ans.addEventListener("keydown", (e) => e.key === "Enter" && submit());
+  // Answer is checked only through the explicit submit button.
   document.getElementById("nextBtn").addEventListener("click", next);
-  [topic, level].forEach((s) => s.addEventListener("change", next));
+  [topic, level].forEach((s) => s.addEventListener("change", () => { q = null; qBox.textContent = "Click Next Question to load your selection."; }));
   next();
 }

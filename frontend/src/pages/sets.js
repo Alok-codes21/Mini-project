@@ -1,3 +1,4 @@
+import { solveButton } from "../lib/solve-button.js";
 import { solveSets, addHistory } from "../api.js";
 import { exampleBar, setVal } from "../lib/extras.js";
 import { tabGroup, mountPlayer, showLoading, showError, pop, A, stagger } from "../lib/fx.js";
@@ -48,8 +49,9 @@ export default function init() {
       A(prev.querySelectorAll("span"), { opacity: [0, 1], scale: [0.7, 1] }, { duration: 0.2, delay: stagger(0.02) });
     });
   });
-  Object.entries(OPS).forEach(([id, [op, label]]) => {
-    document.getElementById(id).addEventListener("click", async () => {
+  let selected = OPS.unionBtn;
+  const run = async () => {
+      const [op, label] = selected;
       if (!a.value.trim()) return showError(resultBox, "Please enter Set A.");
       if (op !== "power" && !b.value.trim()) return showError(resultBox, "Please enter Set B.");
       showLoading(resultBox); showLoading(stepsBox); diagram.textContent = "Drawing…";
@@ -69,6 +71,10 @@ export default function init() {
       }
       mountPlayer(stepsBox, res.steps);
       addHistory({ module: "Sets", operation: label, result: `${r.label} = { ${r.value.slice(0, 12).join(", ")}${r.value.length > 12 ? ", …" : ""} }` });
-    });
+  };
+  Object.entries(OPS).forEach(([id, operation]) => {
+    document.getElementById(id).addEventListener("click", () => { selected = operation; });
   });
+  tabs.select(document.getElementById("unionBtn"), true);
+  solveButton(".set-section", run);
 }
