@@ -16,7 +16,7 @@ export default function init() {
     const v = res.result.value;
     resultBox.innerHTML = `<div class="big-answer">${[...v].map((c) => `<span class="digit">${esc(c)}</span>`).join("")}</div>`;
     A(resultBox.querySelectorAll(".digit"), { opacity: [0, 1], y: [24, 0], filter: ["blur(6px)", "blur(0px)"] }, { duration: 0.5, delay: stagger(0.06) });
-    mountPlayer(stepsBox, res.steps);
+    mountPlayer(stepsBox, res.steps, { detailed: res.detailedSteps });
     addHistory({ module: "Converter", operation: `${from.value} → ${to.value}`, result: `${input.value.trim()} = ${v}` });
   };
   document.getElementById("convertBtn").textContent = "Solve";
