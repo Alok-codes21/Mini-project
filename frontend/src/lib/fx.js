@@ -111,8 +111,18 @@ export function countUp(el, to, dur = 0.8) {
 }
 
 // ---- step player: prev / play / next, dots, progress, slide transitions ----
-export function mountPlayer(box, steps, { autoplay = true, onDone } = {}) {
+export function mountPlayer(box, steps, { autoplay = true, onDone, detailed = null } = {}) {
   if (box._timer) clearInterval(box._timer);
+  if (detailed) {
+    // Short (default) / Detailed switch; both use the same readable step format
+    box.innerHTML = `<div class="view-switch" role="tablist"><button class="vs on" data-v="short">Short steps <small>${steps.length}</small></button><button class="vs" data-v="long">Detailed steps <small>${detailed.length}</small></button></div><div class="view-body"></div>`;
+    const body = box.querySelector(".view-body");
+    const show = (v) => { box.querySelectorAll(".vs").forEach((b) => b.classList.toggle("on", b.dataset.v === v)); mountPlayer(body, v === "short" ? steps : detailed, { autoplay: v === "short" ? autoplay : false, onDone }); };
+    box.querySelectorAll(".vs").forEach((b) => (b.onclick = () => { if (body._timer) clearInterval(body._timer); show(b.dataset.v); }));
+    box._timer = null;
+    show("short");
+    return;
+  }
   let i = 0, dir = 1, timer = null;
   box.innerHTML = `
     <div class="player">

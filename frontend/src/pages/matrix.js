@@ -39,7 +39,7 @@ export default function init() {
       const r = res.result;
       resultBox.innerHTML = r.kind === "matrix" ? grid(r.value, { hl: [] }) : r.kind === "scalar" ? `<div class="big-answer">${r.value}</div>` : `<div class="big-answer small">${r.value}</div>`;
       pop(resultBox.querySelectorAll(".c, .big-answer"));
-      mountPlayer(stepsBox, res.steps);
+      mountPlayer(stepsBox, res.steps, { detailed: res.detailedSteps });
       addHistory({ module: "Matrix", operation: label, result: r.kind === "matrix" ? r.value.map((x) => `[${x.join(" ")}]`).join(" ") : r.value });
       document.querySelector(".explanation").scrollIntoView({ behavior: "smooth", block: "nearest" });
   };
