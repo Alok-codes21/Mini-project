@@ -111,8 +111,22 @@ export function countUp(el, to, dur = 0.8) {
 }
 
 // ---- step player: prev / play / next, dots, progress, slide transitions ----
-export function mountPlayer(box, steps, { autoplay = true, onDone, detailed = null } = {}) {
+export function mountPlayer(box, steps, { autoplay = true, onDone, detailed = null, written = null } = {}) {
   if (box._timer) clearInterval(box._timer);
+  if (written) {
+    // written working first; "Show more" reveals the Short / Detailed steps
+    box.innerHTML = `${written}<button class="more-btn" aria-expanded="false">Show more ▾</button><div class="more-body" hidden></div>`;
+    const btn = box.querySelector(".more-btn"), more = box.querySelector(".more-body");
+    let built = false;
+    btn.onclick = () => {
+      const open = more.hidden;
+      more.hidden = !open; btn.textContent = open ? "Show less ▴" : "Show more ▾"; btn.setAttribute("aria-expanded", open);
+      if (open && !built) { built = true; mountPlayer(more, steps, { autoplay: false, onDone, detailed }); }
+      else if (!open && more._timer) clearInterval(more._timer);
+    };
+    box._timer = null; onDone?.();
+    return;
+  }
   if (detailed) {
     // Short (default) / Detailed switch; both use the same readable step format
     box.innerHTML = `<div class="view-switch" role="tablist"><button class="vs on" data-v="short">Short steps <small>${steps.length}</small></button><button class="vs" data-v="long">Detailed steps <small>${detailed.length}</small></button></div><div class="view-body"></div>`;
