@@ -6,6 +6,7 @@ const pages = ["index", "Matrix", "set", "relation", "converter", "practice", "h
 
 export default defineConfig({
   base: "./",
+  server: { proxy: { "/api": { target: "http://localhost:3000", changeOrigin: true } } },
   plugins: [react()],
   build: {
     rollupOptions: {
