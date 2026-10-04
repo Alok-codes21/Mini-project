@@ -35,7 +35,7 @@ export default function init() {
       if (err) { showError(resultBox, err); stepsBox.innerHTML = "Step-by-step calculations will be displayed here."; return; }
       showLoading(resultBox); showLoading(stepsBox);
       const res = await solveMatrix(op, a.M, b.M);
-      if (res.error) return showError(resultBox, res.error);
+      if (res.error) { stepsBox.textContent = "Fix the input and try again."; return showError(resultBox, res.error); }
       const r = res.result;
       resultBox.innerHTML = r.kind === "matrix" ? grid(r.value, { hl: [] }) : r.kind === "scalar" ? `<div class="big-answer">${r.value}</div>` : `<div class="big-answer small">${r.value}</div>`;
       pop(resultBox.querySelectorAll(".c, .big-answer"));
