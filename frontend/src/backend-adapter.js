@@ -10,8 +10,8 @@
    ========================================================================== */
 import { grid, chips, row, op, esc } from "./ui-helpers.js";
 
-export const API_URL = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
-export const backendEnabled = Boolean(API_URL);
+export const API_URL = (import.meta.env?.VITE_API_URL || "").replace(/\/+$/, "");
+export const backendEnabled = true; // same-origin /api is the default, never silently use demo results
 
 const MATRIX_ROUTES = { add: "add", sub: "subtract", mult: "multiply", transpose: "transpose", determinant: "determinant" };
 const BASES = { Binary: 2, Octal: 8, Decimal: 10, Hexadecimal: 16 };
@@ -23,9 +23,9 @@ const numMatrix = (M) => M.map((r) => r.map(toNum));
 async function post(path, body) {
   let res;
   try {
-    res = await fetch(`${API_URL}${path}?detail=compact`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    res = await fetch(`${API_URL}${path}?detail=full`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   } catch {
-    return { error: `Can't reach the backend at ${API_URL}. Check that it is running and that its CORS_ORIGIN includes this site's address (${location.origin}).` };
+    return { error: `Can't reach the backend. Run the API on port 3000 with the frontend dev server, or use the integrated Vercel preview. For a separate API host, check VITE_API_URL and CORS_ORIGIN.` };
   }
   let data = null;
   try { data = await res.json(); } catch { /* not JSON */ }
@@ -56,11 +56,11 @@ function stepVisual(step, data) {
     const A = st.A || input.A, B = st.B || input.B;
     if (A) parts.push(grid(mat(A), { hl: hlOf(hl, "A"), label: "A" }));
     if (B && data.operation !== "determinant" && data.operation !== "transpose") { parts.push(op(data.operation === "multiply" ? "×" : data.operation === "subtract" ? "−" : "+")); parts.push(grid(mat(B), { hl: hlOf(hl, "B"), label: "B" })); }
-    if (Array.isArray(st.result)) { parts.push(op(data.operation === "transpose" ? "→" : "=")); parts.push(grid(mat(st.result), { hl: hlOf(hl, "C"), label: "Result" })); }
+    if (Array.isArray(st.result)) { parts.push(op(data.operation === "transpose" ? "→" : "=")); parts.push(grid(mat(st.result), { hl: [...hlOf(hl, "C"), ...hlOf(hl, "result")], label: "Result" })); }
     v += row(...parts);
     v += kvChips(st, ["A", "B", "result"]);
   } else {
-    const digits = String(data.input?.number ?? "").replace("-", "").toUpperCase();
+    const digits = String(st.digits ?? (step.stage === "verify" ? data.result : data.input?.number) ?? "").replace("-", "").toUpperCase();
     const hot = new Set(hl.filter((h) => h.digitIndex !== undefined).map((h) => h.digitIndex));
     if (digits && step.stage !== "encode") v += `<div class="pvrow">${[...digits].map((c, i) => `<span class="pv${hot.has(i) ? " hl" : ""}"><b>${esc(c)}</b></span>`).join("")}</div>`;
     if (Array.isArray(st.remainders)) v += chips(st.remainders.map(String));
@@ -84,6 +84,7 @@ function fromBackend(data) {
 export async function backendMatrix(opName, A, B) {
   const route = MATRIX_ROUTES[opName];
   if (!route) return { error: opName === "inverse" ? "Inverse is not available yet (coming soon)." : `Unknown operation: ${opName}` };
+  if (opName === "determinant" && A.length > 4) return { error: "Determinants support at most 4 × 4 matrices. Choose a smaller matrix size." };
   const body = { A: numMatrix(A) };
   if (B) body.B = numMatrix(B);
   const { data, error } = await post(`/api/matrix/${route}`, body);
