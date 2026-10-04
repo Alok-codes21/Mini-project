@@ -1,7 +1,7 @@
 /* ==========================================================================
    API LAYER  -  the ONLY file the UI talks to for maths results.
    --------------------------------------------------------------------------
-   Matrix + Converter go to the real backend when VITE_API_URL is set
+   Matrix + Converter always go to the real backend (same-origin /api by default)
    (via ./backend-adapter.js). Sets, Relations, practice questions and the
    Inverse button still use ./demo-engine.js (placeholder logic).
 
@@ -17,21 +17,19 @@ import { matrixDemo, converterDemo, setsDemo, relationDemo, practiceDemo, checkA
 import { backendEnabled, backendMatrix, backendConvert } from "./backend-adapter.js";
 
 // Backend is used for Matrix (add, subtract, multiply, transpose, determinant) and the Number Converter
-// when VITE_API_URL is set (see .env.example). Everything else stays on the demo engine for now.
+// via same-origin /api or an explicit VITE_API_URL (see .env.example). Everything else stays on the demo engine for now.
 export { backendEnabled };
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms)); // fake latency so loading states are visible
 
 /** op: "add" | "sub" | "mult" | "transpose" | "determinant" | "inverse"; A, B: arrays of arrays of strings */
 export async function solveMatrix(op, A, B) {
-  if (backendEnabled) return backendMatrix(op, A, B); // inverse: backend has no route yet, adapter returns "coming soon"
-  await wait(350); return matrixDemo(op, A, B);
+  return backendMatrix(op, A, B); // inverse: backend has no route yet, adapter returns "coming soon"
 }
 
 /** value: string, fromBase/toBase: "Binary" | "Octal" | "Decimal" | "Hexadecimal" */
 export async function convertNumber(value, fromBase, toBase) {
-  if (backendEnabled) return backendConvert(value, fromBase, toBase);
-  await wait(350); return converterDemo(value, fromBase, toBase);
+  return backendConvert(value, fromBase, toBase);
 }
 
 /** op: "union" | "intersection" | "difference" | "symdiff" | "cartesian" | "power"; setA/setB: "1,2,3" */
