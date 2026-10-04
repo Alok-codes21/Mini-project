@@ -1,3 +1,4 @@
+import { solveButton } from "../lib/solve-button.js";
 import { solveMatrix, addHistory, backendEnabled } from "../api.js";
 import { Fr, grid } from "../ui-helpers.js";
 import { exampleBar, setVal } from "../lib/extras.js";
@@ -25,10 +26,9 @@ export default function init() {
   const tabs = tabGroup(group);
   if (backendEnabled) { const inv = document.getElementById("inverseBtn"); inv.textContent = "Inverse · soon"; inv.title = "Not available from the backend yet"; }
 
-  Object.entries(OPS).forEach(([id, [op, label, needs]]) => {
-    const btn = document.getElementById(id);
-    btn.addEventListener("click", async () => {
-      if (bCard) { bCard.style.display = needs === 2 ? "" : "none"; if (needs === 2) A(bCard, { opacity: [0, 1], scale: [0.96, 1] }, { duration: 0.35 }); }
+  let selected = OPS.addBtn;
+  const run = async () => {
+      const [op, label, needs] = selected;
       const a = readMatrix("matrixA");
       const b = needs === 2 ? readMatrix("matrixB") : { M: null };
       const err = a.error || b.error;
@@ -42,8 +42,14 @@ export default function init() {
       mountPlayer(stepsBox, res.steps);
       addHistory({ module: "Matrix", operation: label, result: r.kind === "matrix" ? r.value.map((x) => `[${x.join(" ")}]`).join(" ") : r.value });
       document.querySelector(".explanation").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  };
+  Object.entries(OPS).forEach(([id, operation]) => {
+    document.getElementById(id).addEventListener("click", () => {
+      selected = operation;
+      if (bCard) bCard.style.display = operation[2] === 2 ? "" : "none";
     });
   });
+  solveButton(".matrix-section", run);
   const fillAll = (a, b) => {
     const A_ = [...document.querySelectorAll("#matrixA input")], B_ = [...document.querySelectorAll("#matrixB input")];
     A_.forEach((el, i) => setTimeout(() => setVal(el, a(i, A_.length)), i * 40));
