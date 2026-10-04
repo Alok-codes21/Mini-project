@@ -221,3 +221,7 @@ input:focus,select:focus{box-shadow:0 0 0 4px var(--shadow-strong)}
 .pv.hl{background:var(--accent);border-color:var(--accent)}.pv.hl b{color:#fff}
 .p-visual{flex-wrap:wrap}.p-visual .formula,.p-visual .kp{flex:1 1 100%;max-width:none}.p-visual .kp{max-width:640px}
 .kvs .kv{align-self:flex-start}.p-visual .kvs{align-items:flex-start;flex:0 1 auto}.kv{height:fit-content}
+
+.solve-action { display:flex; justify-content:center; margin:24px auto 32px; padding:0 24px; }
+.solve-action .primary-btn { min-width:160px; padding:14px 32px; border-radius:12px; background:var(--primary-color, #2563eb); color:white; border:0; font:600 16px Poppins,sans-serif; cursor:pointer; }
+.solve-action .primary-btn:disabled { opacity:.65; cursor:wait; }
