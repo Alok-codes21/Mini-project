@@ -19,10 +19,11 @@ export default function init() {
     mountPlayer(stepsBox, res.steps);
     addHistory({ module: "Converter", operation: `${from.value} → ${to.value}`, result: `${input.value.trim()} = ${v}` });
   };
+  document.getElementById("convertBtn").textContent = "Solve";
   document.getElementById("convertBtn").addEventListener("click", run);
-  input.addEventListener("keydown", (e) => e.key === "Enter" && run());
+  // Choose bases first, then use Solve.
   document.getElementById("clearBtn").addEventListener("click", () => { input.value = ""; from.selectedIndex = 0; to.selectedIndex = 0; reset(); A(resultBox, { opacity: [0, 1] }, { duration: 0.3 }); });
-  const ex = (v, f, t) => () => { setVal(input, v); from.value = f; to.value = t; run(); };
+  const ex = (v, f, t) => () => { setVal(input, v); from.value = f; to.value = t; };
   exampleBar(".converter-section", [
     { label: "1011 binary → decimal", fill: ex("1011", "Binary", "Decimal") },
     { label: "156 decimal → binary", fill: ex("156", "Decimal", "Binary") },
