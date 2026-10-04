@@ -10,6 +10,7 @@
    ========================================================================== */
 import { grid, chips, row, op, esc } from "./ui-helpers.js";
 import { groupSteps } from "./readable-steps.js";
+import { writtenWorking } from "./written-working.js";
 
 export const API_URL = (import.meta.env?.VITE_API_URL || "").replace(/\/+$/, "");
 export const backendEnabled = true; // same-origin /api is the default, never silently use demo results
@@ -126,7 +127,7 @@ function fromBackend(data) {
   const short = groupSteps(data);
   const steps = short || detailed;
   if (data.summary?.notes?.length) for (const list of [steps, detailed]) list[list.length - 1].text += ` Note: ${data.summary.notes.join(" ")}`;
-  return { result, steps, detailedSteps: short ? detailed : null };
+  return { result, steps, detailedSteps: short ? detailed : null, written: writtenWorking(data) };
 }
 
 // ---------- public ----------

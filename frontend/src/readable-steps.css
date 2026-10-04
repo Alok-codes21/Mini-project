@@ -25,3 +25,19 @@
 .cellline{display:flex;flex-direction:column;align-items:center;gap:2px;margin:4px 0}.cellline .work{margin-top:0}
 @media(max-width:600px){.work.nw .eqn{font-size:16px;padding:5px 8px;min-width:26px}}
 .p-visual{flex-direction:column;align-items:center;gap:6px}.p-visual>*{max-width:100%}
+/* written working (solved the way we write by hand) */
+.ww{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px 18px 12px;text-align:left;color:var(--text)}
+.ww-lab{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin:12px 0 2px}
+.ww-line{font-size:17px;line-height:1.9;overflow-wrap:anywhere}
+.ww-line .ww-m{white-space:nowrap}
+.ww-line b{font-weight:700}.ww-res{color:var(--accent)}
+.ww-pad{font-variant-numeric:tabular-nums}
+.ww-hl{background:var(--surface-alt);border:1px solid var(--line);border-radius:6px;padding:0 6px}
+.ww-box{display:inline-block;border:2px solid var(--accent);color:var(--accent);border-radius:8px;padding:0 10px;font-weight:700}
+.ww-ok{color:#16a34a;font-size:12px;margin-left:8px}
+.ww-note{font-size:12px;color:var(--text-muted)}
+.ww-m{display:inline-block;vertical-align:middle;border-left:2px solid var(--text);border-right:2px solid var(--text);border-radius:6px;padding:0 4px;margin:2px 3px}
+.ww-m table{border-collapse:collapse}.ww-m td{padding:0 7px;line-height:1.5;font-size:16px;text-align:center}
+.more-btn{display:block;margin:12px auto 0;border:1px solid var(--line);background:var(--surface-alt);color:var(--accent);font:inherit;font-size:14px;font-weight:600;padding:9px 18px;border-radius:12px;cursor:pointer}
+.more-body{margin-top:12px}
+@media(max-width:600px){.ww{padding:4px 14px 10px}.ww-line{font-size:16px}}
