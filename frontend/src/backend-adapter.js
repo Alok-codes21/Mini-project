@@ -116,7 +116,6 @@ function stepVisual(step, data) {
     if (raw && step.stage !== "encode") v += `<div class="pvrow">${[...raw].map((c, i) => `<span class="pv${hot.has(i) ? " hl" : ""}"><b>${esc(c)}</b>${showPlaces ? `<i>${base}${sup(raw.length - 1 - i)}</i>` : ""}</span>`).join("")}</div>`;
   }
   v += plainWork(step, data);
-  v += `<details class="raw"><summary>Show raw data (JSON)</summary><pre>${esc(JSON.stringify(step, null, 2))}</pre></details>`;
   return v;
 }
 

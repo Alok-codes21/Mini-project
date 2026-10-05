@@ -1,6 +1,6 @@
 /* Beginner-friendly steps: folds the backend's long step list (often 20-60 steps) into a few simple ones.
    The backend is not changed. Numbers shown come from the backend response (result, step states) or are
-   re-computed here only to lay out an example (matrix cells). Raw backend steps stay available in "Show raw data (JSON)". */
+   re-computed here only to lay out an example (matrix cells). */
 import { grid, chips, row, op, esc } from "./ui-helpers.js";
 
 const SUP = "⁰¹²³⁴⁵⁶⁷⁸⁹";
@@ -18,9 +18,7 @@ const workNw = (...p) => `<div class="work nw">${p.join("")}</div>`;
 const rows = (...p) => `<div class="rows">${p.join("")}</div>`;
 const total = (label, v) => `<div class="total"><span>${esc(label)}</span><b>${esc(v)}</b></div>`;
 const step = (title, text, visual, raw) => ({ title, text, visual: visual + rawToggle(raw) });
-function rawToggle(raw) {
-  return `<details class="raw"><summary>Show raw data (JSON)</summary><pre>${esc(JSON.stringify(raw, null, 2))}</pre></details>`;
-}
+function rawToggle() { return ""; }
 const digitRow = (digits, base) =>
   `<div class="pvrow">${[...digits].map((c, i) => `<span class="pv"><b>${esc(c)}</b><i>${base}${sup(digits.length - 1 - i)}</i></span>`).join("")}</div>`;
 
