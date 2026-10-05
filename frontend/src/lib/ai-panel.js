@@ -9,8 +9,8 @@ export function mountAIPanel() {
   panel.className = "ai-panel"; panel.hidden = true; panel.setAttribute("aria-label", "AI math helper");
   panel.innerHTML = `
     <div class="ai-head"><div><b>AI Math Helper</b><small>Ask about any step</small></div><button class="ai-close" aria-label="Close">×</button></div>
-    <div class="ai-body"><div class="ai-msg bot">Hi, I can explain a step, check your working or give a hint. Ask me anything about this page.</div></div>
-    <div class="ai-chips"><button>Explain this step</button><button>Give me a hint</button><button>Why does this work?</button></div>
+    <div class="ai-body"><div class="ai-msg bot">Hi, I can explain a step, check your working or give a hint. Ask me any maths question, English ya Hinglish.</div></div>
+    <div class="ai-chips"><button>Matrix multiply kaise karte hain?</button><button>Binary to decimal kaise?</button><button>Give me a hint</button></div>
     <form class="ai-form"><input placeholder="Ask a question…" aria-label="Message" autocomplete="off"><button type="submit" aria-label="Send">➤</button></form>`;
   document.body.append(fab, panel);
   interactiveButtons(panel); interactiveButtons(document.body);

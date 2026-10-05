@@ -9,6 +9,7 @@ import { checkPractice } from './algorithms/practice.js';
 import { InputError, parseDetail } from './common.js';
 import { addStyleHints } from './style.js';
 import { loadConfig } from './config.js';
+import { aiChatHandler } from './ai-chat.js';
 import openapi from '../docs/openapi.json' with { type: 'json' };
 
 const MATRIX_OPERATIONS = ['add', 'subtract', 'transpose', 'multiply', 'determinant'];
@@ -126,6 +127,10 @@ export function createApp(options = {}) {
 
   app.route('/api/practice/check')
     .post((req, res) => res.json(checkPractice(req.body)))
+    .all(methodNotAllowed('POST, OPTIONS'));
+
+  app.route('/api/ai/chat')
+    .post(aiChatHandler({ env: options.env ?? process.env, models: options.aiModels }))
     .all(methodNotAllowed('POST, OPTIONS'));
 
   app.use((req, res) => failure(res, 404, 'NOT_FOUND', 'Route not found. GET /api lists supported routes.'));

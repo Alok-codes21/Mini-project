@@ -51,7 +51,21 @@ export function clearHistory() { localStorage.removeItem(HISTORY_KEY); }
 // ---- AI math helper (UI only, no model wired) ----
 /** HOOK: connect the AI model here. message: string, context: { page } -> returns { reply: string }.
  *  No keys or model calls live in the frontend; call your team's server endpoint from here. */
+const aiHistory = [];
+/** Maths-only chat via the server route /api/ai/chat (OpenRouter free models; the key stays on the server). */
 export async function askAI(message, context) {
-  await wait(600);
-  return { reply: "The AI helper is not connected yet. This panel is ready for it: connect askAI() in src/api.js." };
+  const base = (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_API_URL) || "";
+  const busy = "AI abhi busy hai (free limit). Thodi der baad try karo.";
+  try {
+    const res = await fetch(`${base}/api/ai/chat`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, context, history: aiHistory.slice(-6) }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.reply) return { reply: data?.error?.message || busy };
+    aiHistory.push({ role: "user", content: message }, { role: "assistant", content: data.reply });
+    return { reply: data.reply };
+  } catch {
+    return { reply: busy };
+  }
 }
