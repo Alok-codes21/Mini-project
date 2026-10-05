@@ -50,16 +50,18 @@ export function tabChevrons(sel = ".operations .button-group") {
 }
 
 // ---- text scramble (letters shuffle then settle left to right) ----
-const GLYPHS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+-=×÷∑∫√π";
+// only letters from maths words (matrix, determinant, set, relation, inverse, sum, sin, cos, log...) so nothing random appears
+const GLYPHS = "matrixdeterminantsetrelationinversesumsincostanloglimitvectorbinaryhexoctal";
+const pick = (ch) => { const g = GLYPHS[(Math.random() * GLYPHS.length) | 0]; return ch === ch.toUpperCase() && ch !== ch.toLowerCase() ? g.toUpperCase() : g; };
 export function scramble(el, { duration = 900 } = {}) {
   if (reduce || el._scr) return;
-  const txt = (el.dataset.scr ?? (el.dataset.scr = el.textContent.replace(/\s+/g, " ").trim())), n = txt.length; el._scr = true; el.style.minWidth = el.getBoundingClientRect().width + "px";
+  const txt = (el.dataset.scr ?? (el.dataset.scr = el.textContent.replace(/\s+/g, " ").trim())), n = txt.length; el._scr = true; el.style.minWidth = el.getBoundingClientRect().width + "px"; el.style.display = "inline-block"; const hd = el.closest("h1,h2"); const hh = hd && hd.getBoundingClientRect().height; if (hd) { if (!hd._hl) { hd.style.minHeight = hh + "px"; hd.style.height = hh + "px"; } hd._hl = (hd._hl || 0) + 1; }
   el.setAttribute("aria-label", txt); const t0 = performance.now();
   const tick = (now) => {
     const p = Math.min(1, (now - t0) / duration); let out = "";
-    for (let i = 0; i < n; i++) { const ch = txt[i]; out += ch === " " || ch === "\n" ? ch : p * 1.25 - (i / n) * 0.25 > 0.9 || i / n < (p - 0.1) * 1.12 ? ch : GLYPHS[(Math.random() * GLYPHS.length) | 0]; }
+    for (let i = 0; i < n; i++) { const ch = txt[i]; out += ch === " " || ch === "\n" ? ch : p * 1.25 - (i / n) * 0.25 > 0.9 || i / n < (p - 0.1) * 1.12 ? ch : pick(ch); }
     el.textContent = out;
-    if (p < 1) requestAnimationFrame(tick); else { el.textContent = txt; el.style.minWidth = ""; el._scr = false; }
+    if (p < 1) requestAnimationFrame(tick); else { el.textContent = txt; el.style.minWidth = ""; el._scr = false; if (hd && --hd._hl <= 0) { hd._hl = 0; hd.style.minHeight = ""; hd.style.height = ""; } }
   };
   requestAnimationFrame(tick);
 }
