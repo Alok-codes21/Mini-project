@@ -67,8 +67,8 @@ export default function init() {
   // scramble the whole hero heading, word by word, after the blur reveal, and again on hover
   const blue = [...document.querySelectorAll(".hero h1 .fx-word")];
   blue.forEach((w) => { w.dataset.scr = w.textContent.trim(); });
-  setTimeout(() => blue.forEach((w, i) => setTimeout(() => scramble(w, { duration: 1000 }), i * 110)), 1500);
-  blue.forEach((w) => w.addEventListener("pointerenter", () => scramble(w, { duration: 700 })));
+  setTimeout(() => blue.forEach((w, i) => setTimeout(() => scramble(w, { duration: 2400 }), i * 260)), 1500);
+  blue.forEach((w) => w.addEventListener("pointerenter", () => scramble(w, { duration: 1500 })));
   document.querySelectorAll(".nav-links a").forEach((a) => { if (!a.children.length) textRoll(a); });
   document.querySelectorAll(".feature-card h3, .module-card h3").forEach((h) => textRoll(h, h.closest(".feature-card, .module-card")));
   // section headings: roll when scrolled into view, and on hover
