@@ -83,17 +83,16 @@ export function scramble(el) {
   };
   const start = () => {
     clearInterval(tick);
-    let visible = 0, offset = 0;
     const text = phrases[index].join("");
+    const started = performance.now();
     paint("", 0);
     tick = setInterval(() => {
-      const oldVisible = visible;
-      if (visible < text.length) visible++;
-      else if (offset < 2) offset++;
-      else { clearInterval(tick); tick = null; }
-      const count = Math.min(Math.max(0, text.length - oldVisible), 2);
+      // Use elapsed time so a busy animation frame cannot delay the 30ms reveal cadence.
+      const visible = Math.min(text.length, Math.floor((performance.now() - started) / 30));
+      const count = Math.min(text.length - visible, 2);
       const random = Array.from({ length: count }, () => characters[Math.floor(Math.random() * characters.length)]).join("");
-      paint(text.slice(0, oldVisible) + random, visible);
+      paint(text.slice(0, visible) + random, visible);
+      if (visible === text.length) { clearInterval(tick); tick = null; }
     }, 30);
   };
   const pause = () => { clearInterval(tick); clearInterval(cycle); tick = cycle = null; };
