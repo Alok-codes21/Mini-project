@@ -49,25 +49,68 @@ export function tabChevrons(sel = ".operations .button-group") {
   });
 }
 
-// ---- text scramble (letters shuffle then settle left to right) ----
-// only letters from maths words (matrix, determinant, set, relation, inverse, sum, sin, cos, log...) so nothing random appears
-const GLYPHS = "matrixdeterminantsetrelationinversesumsincostanloglimitvectorbinaryhexoctal";
-const pick = (ch) => { const g = GLYPHS[(Math.random() * GLYPHS.length) | 0]; return ch === ch.toUpperCase() && ch !== ch.toLowerCase() ? g.toUpperCase() : g; };
-export function scramble(el, { duration = 900 } = {}) {
-  if (reduce || el._scr) return;
-  const txt = (el.dataset.scr ?? (el.dataset.scr = el.textContent.replace(/\s+/g, " ").trim())), n = txt.length; el._scr = true; el.style.minWidth = el.getBoundingClientRect().width + "px"; el.style.display = "inline-block"; const hd = el.closest("h1,h2"); const hh = hd && hd.getBoundingClientRect().height; if (hd) { if (!hd._hl) { hd.style.minHeight = hh + "px"; hd.style.height = hh + "px"; } hd._hl = (hd._hl || 0) + 1; }
-  el.setAttribute("aria-label", txt); const t0 = performance.now();
-  const tick = (now) => {
-    const p = Math.min(1, (now - t0) / duration); let out = "";
-    for (let i = 0; i < n; i++) { const ch = txt[i]; out += ch === " " || ch === "\n" ? ch : p * 1.25 - (i / n) * 0.25 > 0.9 || i / n < (p - 0.1) * 1.12 ? ch : pick(ch); }
-    el.textContent = out;
-    if (p < 1) requestAnimationFrame(tick); else { el.textContent = txt; el.style.minWidth = ""; el._scr = false; if (hd && --hd._hl <= 0) { hd._hl = 0; hd.style.minHeight = ""; hd.style.height = ""; } }
+// ---- Unlumen-style cycling hero scramble ----
+// Source: unlumen-ui-docs.vercel.app/docs/ui/unlumen/scramble-text
+// Same reveal algorithm, character pool, two leading glitches, 30ms tick, 2s cycle.
+export function scramble(el) {
+  if (!el || el.dataset.unlumenScramble) return;
+  el.dataset.unlumenScramble = "true";
+  const phrases = [
+    ["Learn Mathematics Through ", "Interactive Visualizations"],
+    ["Explore Matrices Through ", "Step-by-Step Solutions"],
+    ["Learn Number Systems Through ", "Hands-On Practice"],
+  ];
+  const characters = "abcdefghijklmnopqrstuvwxyz!@#$%^&*()_+";
+  const original = phrases[0].join("");
+  el.setAttribute("aria-label", original);
+  el.classList.add("unlumen-heading");
+  // An invisible size layer reserves all phrase wraps, even during an empty reveal.
+  el.innerHTML = phrases.map(([a,b]) => `<span class="scramble-size" aria-hidden="true">${a}<span>${b}</span></span>`).join("") +
+    '<span class="scramble-display" aria-hidden="true"><span class="scramble-revealed"></span><span class="scramble-glitch"></span></span>';
+  const display = el.querySelector(".scramble-display");
+  const revealed = el.querySelector(".scramble-revealed");
+  const glitch = el.querySelector(".scramble-glitch");
+  let index = 0, tick = null, cycle = null;
+  const paint = (text, count) => {
+    const split = phrases[index][0].length;
+    const plain = text.slice(0, count);
+    revealed.replaceChildren(document.createTextNode(plain.slice(0, split)));
+    if (plain.length > split) {
+      const accent = document.createElement("span"); accent.className = "scramble-accent";
+      accent.textContent = plain.slice(split); revealed.append(accent);
+    }
+    glitch.textContent = text.slice(count);
   };
-  requestAnimationFrame(tick);
-}
-export function scrambleOnView(els) {
-  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { io.unobserve(e.target); scramble(e.target, { duration: 800 + Math.min(600, e.target.textContent.length * 4) }); } }), { threshold: 0.6 });
-  els.forEach((e) => io.observe(e));
+  const start = () => {
+    clearInterval(tick);
+    let visible = 0, offset = 0;
+    const text = phrases[index].join("");
+    paint("", 0);
+    tick = setInterval(() => {
+      const oldVisible = visible;
+      if (visible < text.length) visible++;
+      else if (offset < 2) offset++;
+      else { clearInterval(tick); tick = null; }
+      const count = Math.min(Math.max(0, text.length - oldVisible), 2);
+      const random = Array.from({ length: count }, () => characters[Math.floor(Math.random() * characters.length)]).join("");
+      paint(text.slice(0, oldVisible) + random, visible);
+    }, 30);
+  };
+  const pause = () => { clearInterval(tick); clearInterval(cycle); tick = cycle = null; };
+  const resume = () => {
+    pause();
+    if (reduce) { index = 0; paint(original, original.length); return; }
+    start(); cycle = setInterval(() => { index = (index + 1) % phrases.length; start(); }, 2000);
+  };
+  const observer = new IntersectionObserver(([entry]) => {
+    if (entry.isIntersecting && !document.hidden) resume(); else pause();
+  });
+  observer.observe(el);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) pause();
+    else if (el.getBoundingClientRect().bottom > 0 && el.getBoundingClientRect().top < innerHeight) resume();
+  });
+  window.addEventListener("pagehide", () => { pause(); observer.disconnect(); }, { once: true });
 }
 
 // ---- text roll (each letter rolls up and a copy rolls in, staggered) ----
