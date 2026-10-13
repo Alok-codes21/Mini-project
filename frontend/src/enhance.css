@@ -225,3 +225,17 @@ input:focus,select:focus{box-shadow:0 0 0 4px var(--shadow-strong)}
 .solve-action { display:flex; justify-content:center; margin:24px auto 32px; padding:0 24px; }
 .solve-action .primary-btn { min-width:160px; padding:14px 32px; border-radius:12px; background:var(--primary-color, #2563eb); color:white; border:0; font:600 16px Poppins,sans-serif; cursor:pointer; }
 .solve-action .primary-btn:disabled { opacity:.65; cursor:wait; }
+
+/* Unlumen reference effects, restricted to the hero and solution viewport. */
+.hero-text h1.unlumen-heading{display:grid}
+.unlumen-heading .scramble-size,.unlumen-heading .scramble-display{grid-area:1/1;min-width:0;overflow-wrap:anywhere}
+.unlumen-heading .scramble-size{visibility:hidden;pointer-events:none}
+.hero-motion .hero-text h1 .scramble-display,.hero-motion .hero-text h1 .scramble-revealed{color:#f4f4ef}
+.hero-motion .hero-text h1 .scramble-accent{color:var(--acc)}
+.hero-text h1 .scramble-glitch{color:#E07947;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.solution-blur-frame{position:relative;overflow:hidden;border-radius:14px}
+.solution-scroll{max-height:500px;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.solution-progressive-blur{position:absolute;bottom:0;left:0;width:100%;height:160px;z-index:10;pointer-events:none;opacity:0;transition:opacity .18s;background:linear-gradient(to top,color-mix(in oklch,var(--surface) 100%,transparent) 0%,transparent 100%);mask-image:linear-gradient(to top,black 50%,transparent 100%);-webkit-mask-image:linear-gradient(to top,black 50%,transparent 100%);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);will-change:backdrop-filter}
+.solution-blur-frame.has-more-solution .solution-progressive-blur{opacity:1}
+@media(max-width:600px){.solution-scroll{max-height:min(500px,65svh)}}
+@media(prefers-reduced-motion:reduce){.solution-progressive-blur{transition:none}}
