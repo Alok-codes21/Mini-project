@@ -113,6 +113,20 @@ export function countUp(el, to, dur = 0.8) {
 // ---- step player: prev / play / next, dots, progress, slide transitions ----
 export function mountPlayer(box, steps, { autoplay = true, onDone, detailed = null, written = null } = {}) {
   if (box._timer) clearInterval(box._timer);
+  if (box.matches(".explanation-box") && !box.closest(".solution-blur-frame")) {
+    const frame = document.createElement("div"); frame.className = "solution-blur-frame";
+    box.before(frame); frame.append(box);
+    box.classList.add("solution-scroll");
+    const overlay = document.createElement("div"); overlay.className = "solution-progressive-blur";
+    overlay.setAttribute("aria-hidden", "true"); frame.append(overlay);
+    const update = () => {
+      // Never conceal the last answer: the blur fades away at the end of scrolling.
+      frame.classList.toggle("has-more-solution", box.scrollHeight - box.clientHeight - box.scrollTop > 2);
+    };
+    box.addEventListener("scroll", update, { passive: true });
+    new ResizeObserver(update).observe(box);
+    new MutationObserver(update).observe(box, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden"] });
+  }
   if (written) {
     // written working first; "Show more" reveals the Short / Detailed steps
     box.innerHTML = `${written}<button class="more-btn" aria-expanded="false">Show more ▾</button><div class="more-body" hidden></div>`;
