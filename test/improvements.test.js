@@ -289,7 +289,7 @@ test('item 11: POST /api/practice/check over HTTP, reveal, and validation', asyn
 });
 test('item 11: route is listed and documented', async () => {
   const api = await (await fetch(base + '/api')).json();
-  assert.equal(api.routes.length, 6);
+  assert.equal(api.routes.length, 16);
   assert.deepEqual(api.optionalRoutes, ['POST /api/practice/check']);
   const doc = await (await fetch(base + '/api/openapi.json')).json();
   assert.ok(doc.paths['/api/practice/check'].post);
