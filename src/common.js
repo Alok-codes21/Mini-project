@@ -60,7 +60,27 @@ const WHY = {
   'reverse-remainders': 'Why: the first remainder is the smallest place, so the digits are read backwards.',
   'restore-sign': 'Why: the sign was set aside at the start and is put back at the end.',
   'compare-values': 'Why: converting back and getting the same value proves the conversion is right.',
-  'before-you-start': 'Why: these few ideas make every later step easier to follow.'
+  'before-you-start': 'Why: these few ideas make every later step easier to follow.',
+  'read-sets': 'Why: knowing the exact elements and sizes is the starting point of every set operation.',
+  'read-relation': 'Why: a relation is just a set of ordered pairs, so we first list them.',
+  'check-input': 'Why: the operation is only defined when the input follows the rules, so we check first.',
+  'start-result': 'Why: we build the answer one piece at a time, starting from nothing.',
+  'select-element': 'Why: each element is tested on its own so no element is forgotten.',
+  'add-element': 'Why: this element passes the test, so it belongs in the result.',
+  'skip-element': 'Why: this element fails the test, so it stays out (or is a repeat).',
+  'record-missing': 'Why: one such element is enough to show the property fails.',
+  'confirm-element': 'Why: every element must pass, so each one is confirmed in turn.',
+  'count-element': 'Why: the size of a set is found by counting each distinct element once.',
+  'double-subsets': 'Why: each new element is either left out or put into every earlier subset, which doubles the count.',
+  'add-pair': 'Why: this pair belongs in the answer, so it is written down.',
+  'skip-duplicate': 'Why: a set has no repeats, so a pair that is already there is not added again.',
+  'skip-pair': 'Why: nothing needs to be added here because the pair is already present.',
+  'check-pair': 'Why: a property is true only if it holds for every pair, so each pair is checked.',
+  'property-result': 'Why: after every check we can say whether the property holds.',
+  'invert-pair': 'Why: the inverse swaps the two parts of every pair.',
+  'select-intermediate': 'Why: Warshall\'s method allows one more element at a time as a stepping stone between two others.',
+  'build-class': 'Why: an equivalence class collects everything related to one element.',
+  'complete-result': 'Why: every element has been handled, so the result is final.'
 };
 
 // Machine indices are 0-based, learner text is 1-based. Only concrete references like A[0][2]
