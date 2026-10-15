@@ -22,10 +22,10 @@ export const BACKEND_MATRIX_OPS = Object.keys(MATRIX_ROUTES);
 const toNum = (fr) => Number(fr.n) / Number(fr.d); // fractions from the UI -> JSON numbers
 const numMatrix = (M) => M.map((r) => r.map(toNum));
 
-async function post(path, body) {
+async function post(path, body, detail = "full") {
   let res;
   try {
-    res = await fetch(`${API_URL}${path}?detail=full`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    res = await fetch(`${API_URL}${path}?detail=${detail}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   } catch {
     return { error: `Can't reach the backend. Run the API on port 3000 with the frontend dev server, or use the integrated Vercel preview. For a separate API host, check VITE_API_URL and CORS_ORIGIN.` };
   }
@@ -143,4 +143,80 @@ export async function backendMatrix(opName, A, B) {
 export async function backendConvert(value, fromName, toName) {
   const { data, error } = await post("/api/number-system/convert", { number: String(value).trim(), fromBase: BASES[fromName], toBase: BASES[toName] });
   return error ? { error } : fromBackend(data);
+}
+
+// ---------- Sets + Relations (real backend: /api/sets/*, /api/relations/*) ----------
+const SET_ROUTES = { union: "union", intersection: "intersection", difference: "difference", symdiff: "symmetric-difference", cartesian: "cartesian-product", power: "power-set" };
+const SET_NAMES = { union: "A ∪ B", intersection: "A ∩ B", difference: "A − B", symdiff: "A Δ B", cartesian: "A × B", power: "P(A)" };
+const parseElement = (t) => (/^-?\d+(\.\d+)?$/.test(t) ? Number(t) : t);
+const parseList = (text) => String(text || "").split(",").map((x) => x.trim()).filter(Boolean).map(parseElement);
+const parsePairs = (text) => [...String(text || "").matchAll(/\(\s*([^,()]+?)\s*,\s*([^,()]+?)\s*\)/g)].map((m) => [parseElement(m[1]), parseElement(m[2])]);
+const el = (x) => String(x);
+const pairStr = ([a, b]) => `(${el(a)}, ${el(b)})`;
+const subsetStr = (s) => (s.length ? `{${s.map(el).join(", ")}}` : "∅");
+const isPair = (x) => Array.isArray(x) && x.length === 2 && !Array.isArray(x[0]);
+
+// step visual: show what has been built so far (backend state.result) as chips or a 0/1 grid
+function setStepVisual(step) {
+  const r = step.state?.result;
+  if (Array.isArray(r) && r.length && Array.isArray(r[0]) && r[0].every((c) => c === 0 || c === 1 || c === null)) return grid(mat(r), { label: "Matrix" });
+  if (Array.isArray(r)) {
+    const items = r.map((x) => (Array.isArray(x) ? (isPair(x) ? pairStr(x) : subsetStr(x)) : x && typeof x === "object" ? `${el(x.from)} → ${el(x.to)}` : el(x)));
+    return `<div class="mx-label">Result so far</div>` + (items.length ? chips(items.slice(0, 64)) : chips(["∅"]));
+  }
+  return "";
+}
+const mapSteps = (data) => data.steps.map((s) => ({ title: esc(s.title), text: esc(s.explanation), visual: setStepVisual(s) }));
+
+// short steps (compact) + detailed steps (full); the full response is the source of truth for the result
+async function twoViews(path, body) {
+  const [full, compact] = await Promise.all([post(path, body), post(path, body, "compact")]);
+  return { full, compact };
+}
+
+export async function backendSets(opName, aText, bText) {
+  const route = SET_ROUTES[opName];
+  if (!route) return { error: `Unknown set operation: ${opName}` };
+  const body = { A: parseList(aText) };
+  if (opName !== "power") body.B = parseList(bText);
+  const { full, compact } = await twoViews(`/api/sets/${route}`, body);
+  if (full.error) return { error: full.error };
+  const data = full.data, r = data.result;
+  const value = opName === "power" ? r.map(subsetStr) : opName === "cartesian" ? r.map(pairStr) : r.map(el);
+  const A = data.input.A, B = data.input.B || [];
+  const inA = new Set(A.map((x) => JSON.stringify(x))), inB = new Set(B.map((x) => JSON.stringify(x)));
+  const onlyA = A.filter((x) => !inB.has(JSON.stringify(x))).map(el), both = A.filter((x) => inB.has(JSON.stringify(x))).map(el), onlyB = B.filter((x) => !inA.has(JSON.stringify(x))).map(el);
+  const venn = ["union", "intersection", "difference", "symdiff"].includes(opName) ? { op: opName, onlyA, both, onlyB } : null;
+  const detailed = mapSteps(data);
+  const short = compact.error ? null : mapSteps(compact.data);
+  const notes = data.summary?.notes?.length ? ` Note: ${data.summary.notes.join(" ")}` : "";
+  const last = (list) => { if (notes && list.length) list[list.length - 1].text += esc(notes); };
+  last(detailed); if (short) last(short);
+  return { result: { kind: "set", label: SET_NAMES[opName], value, venn }, steps: short || detailed, detailedSteps: short ? detailed : null };
+}
+
+export async function backendRelation(uText, rText) {
+  const U = parseList(uText), pairs = parsePairs(rText);
+  if (!U.length) return { error: "Universal set is empty." };
+  if (!pairs.length) return { error: "Could not read any pairs. Use the form (1,2),(2,3)." };
+  const body = { A: U, R: pairs };
+  const [an, mx, anC] = await Promise.all([post("/api/relations/analyze", body), post("/api/relations/matrix", body), post("/api/relations/analyze", body, "compact")]);
+  if (an.error) return { error: an.error };
+  if (mx.error) return { error: mx.error };
+  const d = an.data, P = d.result.properties, C = d.result.counterexamples || {};
+  const why = (name, key, yes) => (P[key] ? yes : `Fails: ${(C[key] || []).slice(0, 3).map(pairStr).join(", ")}${(C[key] || []).length > 3 ? ", …" : ""}.`);
+  const props = [
+    { name: "Reflexive", ok: P.reflexive, why: why("Reflexive", "reflexive", "Every element is related to itself.") },
+    { name: "Symmetric", ok: P.symmetric, why: why("Symmetric", "symmetric", "Every (a,b) has its (b,a).") },
+    { name: "Antisymmetric", ok: P.antisymmetric, why: why("Antisymmetric", "antisymmetric", "No two different elements are related both ways.") },
+    { name: "Transitive", ok: P.transitive, why: why("Transitive", "transitive", "Whenever (a,b) and (b,c) are there, (a,c) is too.") },
+  ];
+  const type = P.equivalence && P.partialOrder ? "Equivalence relation and partial order" : P.equivalence ? "Equivalence relation" : P.partialOrder ? "Partial order" : "Neither equivalence nor partial order";
+  const detailed = mapSteps(d);
+  const short = anC.error ? null : mapSteps(anC.data);
+  const notes = d.summary?.notes?.length ? ` Note: ${d.summary.notes.join(" ")}` : "";
+  const fin = (list) => { if (list.length) { list[list.length - 1].text += esc(notes); list[list.length - 1].visual += `<div class="big-answer small">${esc(type)}</div>`; } };
+  fin(detailed); if (short) fin(short);
+  const U2 = d.input.A.map(el), pairs2 = d.input.R.map(([a, b]) => [el(a), el(b)]);
+  return { result: { kind: "relation", props, type, U: U2, pairs: pairs2, matrix: mx.data.result.matrix.map((r) => r.map(String)) }, steps: short || detailed, detailedSteps: short ? detailed : null };
 }

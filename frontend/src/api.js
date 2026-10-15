@@ -13,8 +13,8 @@
    History is stored in localStorage under HISTORY_KEY; swap the three
    history functions to use the server if the team stores it there.
    ========================================================================== */
-import { matrixDemo, converterDemo, setsDemo, relationDemo, practiceDemo, checkAnswerDemo } from "./demo-engine.js";
-import { backendEnabled, backendMatrix, backendConvert } from "./backend-adapter.js";
+import { matrixDemo, converterDemo, practiceDemo, checkAnswerDemo } from "./demo-engine.js";
+import { backendEnabled, backendMatrix, backendConvert, backendSets, backendRelation } from "./backend-adapter.js";
 
 // Backend is used for Matrix (add, subtract, multiply, transpose, determinant) and the Number Converter
 // via same-origin /api or an explicit VITE_API_URL (see .env.example). Everything else stays on the demo engine for now.
@@ -33,10 +33,10 @@ export async function convertNumber(value, fromBase, toBase) {
 }
 
 /** op: "union" | "intersection" | "difference" | "symdiff" | "cartesian" | "power"; setA/setB: "1,2,3" */
-export async function solveSets(op, setA, setB) { await wait(350); return setsDemo(op, setA, setB); }
+export async function solveSets(op, setA, setB) { return backendSets(op, setA, setB); }
 
 /** universal: "1,2,3,4", relation: "(1,2),(2,3)" */
-export async function analyzeRelation(universal, relation) { await wait(350); return relationDemo(universal, relation); }
+export async function analyzeRelation(universal, relation) { return backendRelation(universal, relation); }
 
 /** topic: Matrix | Sets | Relations | Number Systems ; level: Easy | Medium | Hard -> { question, answer, type } */
 export async function getPracticeQuestion(topic, level) { await wait(250); return practiceDemo(topic, level); }
