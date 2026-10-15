@@ -33,7 +33,12 @@ function assertErrorShape(data, code) {
 test('health and route discovery', async () => {
   assert.equal((await (await fetch(base + '/health')).json()).status, 'ok');
   const api = await (await fetch(base + '/api')).json();
-  assert.equal(api.routes.length, 6);
+  assert.equal(api.routes.length, 16);
+  assert.ok(api.modules.includes('sets') && api.modules.includes('relations'));
+  assert.ok(api.routes.includes('POST /api/sets/union'));
+  assert.ok(api.routes.includes('POST /api/relations/analyze'));
+  assert.ok(api.routes.includes('POST /api/relations/relation'));
+  assert.ok(api.routes.includes('POST /api/relations/directed-graph'));
   assert.equal(api.limits.rateLimit.requests, 1000);
 });
 
@@ -41,9 +46,35 @@ test('OpenAPI document covers every discovered route', async () => {
   const api = await (await fetch(base + '/api')).json();
   const doc = await (await fetch(base + api.openapi)).json();
   for (const route of api.routes) {
-    const path = route.replace('POST ', '');
+    const path = route.replace(/\/api\/sets\/[^/]+$/, '/api/sets/{operation}')
+      .replace(/\/api\/relations\/[^/]+$/, '/api/relations/{operation}')
+      .replace('POST ', '');
     assert.ok(doc.paths[path]?.post, `${path} documented`);
   }
+});
+
+test('set and relation operation routes return calculation results', async () => {
+  const sets = await post('/api/sets/union', { A: [1, 2], B: [2, 3] });
+  assert.equal(sets.status, 200);
+  assert.deepEqual(sets.data.result, [1, 2, 3]);
+
+  const relations = await post('/api/relations/analyze', { A: [1, 2], R: [[1, 1], [2, 2]] });
+  assert.equal(relations.status, 200);
+  assert.equal(relations.data.result.properties.reflexive, true);
+
+  const relation = await post('/api/relations/relation', { A: [1, 2], R: [[1, 1], [2, 2]] });
+  assert.equal(relation.status, 200);
+  assert.deepEqual(relation.data.result, relations.data.result);
+
+  const graph = await post('/api/relations/directed-graph', { A: [1, 2], R: [[1, 2]] });
+  assert.equal(graph.status, 200);
+  assert.deepEqual(graph.data.result, { nodes: [1, 2], edges: [{ from: 1, to: 2 }] });
+
+  const matrix = await post('/api/relations/matrix', { A: [1, 2], R: [[1, 2]] });
+  assert.equal(matrix.status, 200);
+  assert.deepEqual(matrix.data.result, { elements: [1, 2], matrix: [[0, 1], [0, 0]] });
+
+  assert.equal((await post('/api/relations/properties', { A: [1], R: [[1, 1]] })).status, 404);
 });
 
 test('all operation endpoints return the full response contract', async () => {

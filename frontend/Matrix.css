@@ -1,0 +1,276 @@
+/*  MATRIX PAGE */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Poppins',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    transition:background .3s ease, color .3s ease;
+}
+
+/* Page Title */
+
+.page-title{
+    text-align:center;
+    padding:60px 20px;
+}
+
+.page-title h1{
+    font-size:42px;
+    color:var(--accent);
+    margin-bottom:15px;
+}
+
+.page-title p{
+    max-width:700px;
+    margin:auto;
+    color:var(--text-soft);
+    line-height:1.7;
+    font-size:18px;
+}
+
+/* Matrix Section */
+
+.matrix-section{
+    display:flex;
+    justify-content:center;
+    gap:40px;
+    flex-wrap:wrap;
+    padding:30px 8%;
+}
+
+.matrix-card{
+    background:var(--surface);
+    color:var(--text);
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 10px 25px var(--shadow);
+    width:320px;
+    text-align:center;
+}
+
+.matrix-card h2{
+    margin-bottom:20px;
+    color:var(--accent);
+}
+
+/* Size Controls */
+
+.size-controls{
+    max-width:500px;
+    margin:0 auto 30px;
+    text-align:center;
+    background:var(--surface);
+    padding:20px;
+    border-radius:15px;
+    box-shadow:0 8px 20px var(--shadow);
+}
+
+.size-controls label{
+    display:block;
+    font-size:18px;
+    margin-bottom:10px;
+    color:var(--accent);
+    font-weight:600;
+}
+
+.size-input-row{
+    display:flex;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+}
+
+.size-input-row input{
+    width:90px;
+    padding:10px 12px;
+    border:2px solid var(--text-muted);
+    border-radius:8px;
+    outline:none;
+    font-size:16px;
+    background:var(--surface-alt);
+    color:var(--text);
+}
+
+.size-input-row button{
+    padding:10px 20px;
+    border:none;
+    border-radius:8px;
+    background:var(--accent);
+    color:white;
+    cursor:pointer;
+    font-size:16px;
+}
+
+.size-input-row button:hover{
+    background:var(--accent-dark);
+}
+
+.size-hint{
+    margin-top:12px;
+    color:var(--text-soft);
+    font-size:14px;
+}
+
+/* Matrix Grid */
+
+.matrix-grid-container{
+    display:flex;
+    justify-content:center;
+}
+
+.matrix-grid{
+    display:grid;
+    gap:12px;
+    justify-content:center;
+}
+
+.matrix-grid input{
+    width:60px;
+    height:60px;
+    text-align:center;
+    font-size:18px;
+    border:2px solid var(--text-muted);
+    border-radius:10px;
+    outline:none;
+    transition:.3s;
+    background:var(--surface-alt);
+    color:var(--text);
+}
+
+.matrix-grid input:focus{
+    border-color:var(--accent);
+}
+
+/* Operations */
+
+.operations{
+    padding:50px 8%;
+    text-align:center;
+}
+
+.operations h2{
+    margin-bottom:25px;
+    color:var(--accent);
+}
+
+.button-group{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:20px;
+}
+
+.button-group button{
+    padding:12px 25px;
+    border:none;
+    border-radius:8px;
+    background:var(--accent);
+    color:white;
+    cursor:pointer;
+    font-size:16px;
+    transition:.3s;
+}
+
+.button-group button:hover{
+    background:var(--accent-dark);
+    transform:translateY(-3px);
+}
+
+/* Result */
+
+.result{
+    padding:50px 8%;
+}
+
+.result h2{
+    text-align:center;
+    color:var(--accent);
+    margin-bottom:20px;
+}
+
+.result-box{
+    background:var(--surface);
+    color:var(--text);
+    min-height:150px;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 8px 20px var(--shadow);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:20px;
+}
+
+/* Explanation */
+
+.explanation{
+    padding:50px 8%;
+}
+
+.explanation h2{
+    text-align:center;
+    color:var(--accent);
+    margin-bottom:20px;
+}
+
+.explanation-box{
+    background:var(--surface);
+    min-height:220px;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 8px 20px var(--shadow);
+    line-height:1.8;
+    color:var(--text-soft);
+}
+
+/* Footer */
+
+footer{
+    margin-top:60px;
+    background:var(--surface-alt);
+    color:var(--text);
+    text-align:center;
+    padding:25px;
+}
+
+/* Responsive */
+
+@media(max-width:768px){
+
+.page-title h1{
+    font-size:34px;
+}
+
+.matrix-section{
+    flex-direction:column;
+    align-items:center;
+}
+
+.matrix-card{
+    width:100%;
+    max-width:350px;
+}
+
+.button-group{
+    flex-direction:column;
+}
+
+.button-group button{
+    width:100%;
+    max-width:300px;
+    margin:auto;
+}
+
+.result-box,
+.explanation-box{
+    font-size:18px;
+}
+
+}

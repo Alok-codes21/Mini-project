@@ -5,10 +5,13 @@ import helmet from 'helmet';
 import { rateLimit } from 'express-rate-limit';
 import { calculateMatrix } from './algorithms/matrix.js';
 import { convertNumber } from './algorithms/number-system.js';
+import { calculateSets, SET_OPERATIONS } from './algorithms/sets.js';
+import { calculateRelation, RELATION_OPERATIONS } from './algorithms/relations.js';
 import { checkPractice } from './algorithms/practice.js';
 import { InputError, parseDetail } from './common.js';
 import { addStyleHints } from './style.js';
 import { loadConfig } from './config.js';
+import { aiChatHandler } from './ai-chat.js';
 import openapi from '../docs/openapi.json' with { type: 'json' };
 
 const MATRIX_OPERATIONS = ['add', 'subtract', 'transpose', 'multiply', 'determinant'];
@@ -88,8 +91,10 @@ export function createApp(options = {}) {
 
   app.get('/api', (req, res) => res.json({
     name: 'Matrix & Number System Learning API', schemaVersion: '1.0',
-    modules: ['matrix', 'number-system'],
-    routes: ['POST /api/matrix/add', 'POST /api/matrix/subtract', 'POST /api/matrix/transpose', 'POST /api/matrix/multiply', 'POST /api/matrix/determinant', 'POST /api/number-system/convert'],
+    modules: ['matrix', 'number-system', 'sets', 'relations'],
+    routes: ['POST /api/matrix/add', 'POST /api/matrix/subtract', 'POST /api/matrix/transpose', 'POST /api/matrix/multiply', 'POST /api/matrix/determinant', 'POST /api/number-system/convert',
+      ...SET_OPERATIONS.map(operation => `POST /api/sets/${operation}`),
+      ...RELATION_OPERATIONS.map(operation => `POST /api/relations/${operation}`)],
     limits: {
       matrixRows: 8, matrixColumns: 8, matrixAbsoluteEntry: 1000000, determinantSize: 4, sourceDigits: 64, bodyBytes: BODY_LIMIT_BYTES,
       rateLimit: { requests: config.rateLimit.max, windowSeconds: config.rateLimit.windowMs / 1000 }
@@ -126,6 +131,21 @@ export function createApp(options = {}) {
 
   app.route('/api/practice/check')
     .post((req, res) => res.json(checkPractice(req.body)))
+    .all(methodNotAllowed('POST, OPTIONS'));
+
+  for (const operation of SET_OPERATIONS) {
+    app.route(`/api/sets/${operation}`)
+      .post((req, res) => res.json(withStyle(req, calculateSets(operation, req.body, { detail: parseDetail(req.query.detail) }))))
+      .all(methodNotAllowed('POST, OPTIONS'));
+  }
+  for (const operation of RELATION_OPERATIONS) {
+    app.route(`/api/relations/${operation}`)
+      .post((req, res) => res.json(withStyle(req, calculateRelation(operation, req.body, { detail: parseDetail(req.query.detail) }))))
+      .all(methodNotAllowed('POST, OPTIONS'));
+  }
+
+  app.route('/api/ai/chat')
+    .post(aiChatHandler({ env: options.env ?? process.env, models: options.aiModels }))
     .all(methodNotAllowed('POST, OPTIONS'));
 
   app.use((req, res) => failure(res, 404, 'NOT_FOUND', 'Route not found. GET /api lists supported routes.'));

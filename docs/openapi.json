@@ -26,6 +26,135 @@
         }
       }
     },
+    "/api/sets/{operation}": {
+      "post": {
+        "summary": "Perform a set operation",
+        "description": "Supported operations: union, intersection, difference, symmetric-difference, power-set, cartesian-product. Provide A and, except for power-set, B in the JSON body.",
+        "parameters": [
+          {
+            "name": "operation",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "union",
+                "intersection",
+                "difference",
+                "symmetric-difference",
+                "power-set",
+                "cartesian-product"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "A"
+                ],
+                "properties": {
+                  "A": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "B": {
+                    "type": "array",
+                    "items": {
+                      "oneOf": [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Set result with step-by-step trace"
+          },
+          "400": {
+            "description": "Invalid operation or input"
+          }
+        }
+      }
+    },
+    "/api/relations/{operation}": {
+      "post": {
+        "summary": "Perform a relation operation",
+        "description": "The JSON body fields depend on the operation. Operations use a relation R and may also require a domain A or a second relation S.",
+        "parameters": [
+          {
+            "name": "operation",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "analyze",
+                "relation",
+                "matrix",
+                "directed-graph"
+              ]
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "R"
+                ],
+                "properties": {
+                  "A": {
+                    "type": "array"
+                  },
+                  "R": {
+                    "type": "array",
+                    "items": {
+                      "type": "array",
+                      "minItems": 2,
+                      "maxItems": 2
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Relation result with step-by-step trace"
+          },
+          "400": {
+            "description": "Invalid operation or input"
+          }
+        }
+      }
+    },
     "/api/matrix/add": {
       "post": {
         "summary": "Add two matrices",

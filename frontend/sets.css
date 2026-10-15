@@ -1,0 +1,211 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Poppins',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    transition:background .3s ease, color .3s ease;
+}
+
+/* Page Title */
+
+.page-title{
+    text-align:center;
+    padding:60px 20px;
+}
+
+.page-title h1{
+    font-size:42px;
+    color:var(--accent);
+    margin-bottom:15px;
+}
+
+.page-title p{
+    max-width:700px;
+    margin:auto;
+    color:var(--text-soft);
+    line-height:1.7;
+    font-size:18px;
+}
+
+/* Set Section */
+
+.set-section{
+    display:flex;
+    justify-content:center;
+    gap:40px;
+    flex-wrap:wrap;
+    padding:30px 8%;
+}
+
+.set-card{
+    background:var(--surface);
+    color:var(--text);
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 10px 25px var(--shadow);
+    width:320px;
+    text-align:center;
+}
+
+.set-card h2{
+    margin-bottom:20px;
+    color:var(--accent);
+}
+
+/* Set Grid */
+
+.set-card input{
+    width:100%;
+    padding:15px;
+    font-size:18px;
+    border:2px solid var(--text-muted);
+    border-radius:10px;
+    outline:none;
+    background:var(--surface-alt);
+    color:var(--text);
+}
+
+.set-card input:focus{
+    border-color:var(--accent);
+}
+
+/* Operations */
+
+.operations{
+    padding:50px 8%;
+    text-align:center;
+}
+
+.operations h2{
+    margin-bottom:25px;
+    color:var(--accent);
+}
+
+.button-group{
+    display:flex;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:20px;
+}
+
+.button-group button{
+    padding:12px 25px;
+    border:none;
+    border-radius:8px;
+    background:var(--accent);
+    color:white;
+    cursor:pointer;
+    font-size:16px;
+    transition:.3s;
+}
+
+.button-group button:hover{
+    background:var(--accent-dark);
+    transform:translateY(-3px);
+}
+
+/* Result */
+
+.result{
+    padding:50px 8%;
+}
+
+.result h2{
+    text-align:center;
+    color:var(--accent);
+    margin-bottom:20px;
+}
+
+.result-box{
+    background:var(--surface);
+    color:var(--text);
+    min-height:150px;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 8px 20px var(--shadow);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    font-size:20px;
+}
+.diagram
+{
+
+    justify-content:center;
+    justify-items:center;
+    margin-top:30px;
+    border:2px solid var(--accent);
+    border-radius:5px;
+}
+/* Explanation */
+
+.explanation{
+    padding:50px 8%;
+}
+
+.explanation h2{
+    text-align:center;
+    color:var(--accent);
+    margin-bottom:20px;
+}
+
+.explanation-box{
+    background:var(--surface);
+    min-height:220px;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 8px 20px var(--shadow);
+    line-height:1.8;
+    color:var(--text-soft);
+}
+
+/* Footer */
+
+footer{
+    margin-top:60px;
+    background:var(--surface-alt);
+    color:var(--text);
+    text-align:center;
+    padding:25px;
+}
+
+/* Responsive */
+
+@media(max-width:768px){
+
+.page-title h1{
+    font-size:34px;
+}
+
+.set-section{
+    flex-direction:column;
+    align-items:center;
+}
+
+.set-card{
+    width:100%;
+    max-width:350px;
+}
+
+.button-group{
+    flex-direction:column;
+}
+
+.button-group button{
+    width:100%;
+    max-width:300px;
+    margin:auto;
+}
+
+.result-box,
+.explanation-box{
+    font-size:18px;
+}
+
+}

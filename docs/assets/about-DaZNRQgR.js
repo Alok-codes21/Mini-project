@@ -1,0 +1,1 @@
+import{A as r,f as o}from"./main-BHIKuzTw.js";function n(){document.querySelectorAll(".about-card").forEach(e=>{const t=e.querySelectorAll("li");t.length&&e.addEventListener("mouseenter",()=>r(t,{x:[0,6,0]},{duration:.4,delay:o(.04)}))})}export{n as default};
