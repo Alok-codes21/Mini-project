@@ -51,7 +51,7 @@ export default function init() {
     }
     resultBox.innerHTML = `<div class="props">${x.props.map((p) => `<div class="prop"><span class="p-name">${p.name}</span><span class="p-val ${p.ok ? "yes" : "no"}">${p.ok ? "Yes" : "No"}</span></div>`).join("")}<div class="prop-type">${x.type}</div></div>`;
     A(resultBox.querySelectorAll(".prop, .prop-type"), { opacity: [0, 1], x: [-20, 0] }, { duration: 0.4, delay: stagger(0.1) });
-    mountPlayer(stepsBox, res.steps);
+    mountPlayer(stepsBox, res.steps, { detailed: res.detailedSteps });
     addHistory({ module: "Relations", operation: label, result: x.type });
   };
   document.getElementById("analyzeBtn").addEventListener("click", () => { selected = ["graph", "Analyze"]; });

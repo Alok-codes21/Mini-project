@@ -58,7 +58,7 @@ export default function init() {
       const res = await solveSets(op, a.value, b.value);
       if (res.error) return showError(resultBox, res.error);
       const r = res.result;
-      resultBox.innerHTML = `<div class="set-answer"><span class="mx-label">${r.label}</span><div class="chips big">${(r.value.slice(0, 60).map((x) => `<span class="chip">${x}</span>`).join("")) || '<span class="chip">∅</span>'}</div></div>`;
+      resultBox.innerHTML = `<div class="set-answer"><span class="mx-label">${r.label}</span><div class="chips big">${(r.value.slice(0, 256).map((x) => `<span class="chip">${x}</span>`).join("")) || '<span class="chip">∅</span>'}</div></div>`;
       pop(resultBox.querySelectorAll(".chip"));
       if (r.venn) {
         diagram.innerHTML = vennSvg(r.venn);
@@ -66,10 +66,10 @@ export default function init() {
         A(diagram.querySelector(".shape"), { opacity: [0, 1] }, { duration: 0.6, delay: 0.4 });
         A(diagram.querySelectorAll(".el, .lbl"), { opacity: [0, 1] }, { duration: 0.4, delay: 0.6 });
       } else {
-        diagram.innerHTML = `<div class="mx-label">${r.label}</div><div class="chips big">${r.value.slice(0, 64).map((x) => `<span class="chip">${x}</span>`).join("")}</div>`;
+        diagram.innerHTML = `<div class="mx-label">${r.label}</div><div class="chips big">${r.value.slice(0, 256).map((x) => `<span class="chip">${x}</span>`).join("")}</div>`;
         pop(diagram.querySelectorAll(".chip"));
       }
-      mountPlayer(stepsBox, res.steps);
+      mountPlayer(stepsBox, res.steps, { detailed: res.detailedSteps });
       addHistory({ module: "Sets", operation: label, result: `${r.label} = { ${r.value.slice(0, 12).join(", ")}${r.value.length > 12 ? ", …" : ""} }` });
   };
   Object.entries(OPS).forEach(([id, operation]) => {
